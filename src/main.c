@@ -8,6 +8,10 @@ int main()
     InitWindow(1280, 720, "Osu Music Player");
     SetTargetFPS(60);
 
+    float volumeValue = 0.0f;
+    
+    float songProgress = 0.0f;
+
     int currentPlaylistScrollIndex = 0, currentPlaylistActive = 1;
 
     bool showBrowseSongList = false;
@@ -28,7 +32,20 @@ int main()
 
             DrawRectangleLines(10, 10, 900, 600, WHITE);
             DrawRectangleLines(20, 20, 880, 580, GRAY);
-            DrawRectangleLines(10, 620, 900, 80, GREEN);
+            DrawRectangle(10, 620, 900, 80, GRAY);
+
+            GuiDrawIcon(122, 25, 630, 2, WHITE);
+            GuiSliderBar((Rectangle){65, 637, 200, 15}, "", "", &volumeValue, 0.0f, 1.0f);
+            GuiDrawIcon(129, 360, 630, 2, WHITE);
+            GuiDrawIcon(131, 410, 630, 2, WHITE);
+            GuiDrawIcon(132, 460, 630, 2, WHITE);
+            GuiDrawIcon(134, 510, 630, 2, WHITE);
+            GuiDrawIcon(58, 860, 630, 2, WHITE);
+            
+            DrawText("0:01/10:00", 25, 670, 20, WHITE);
+            DrawRectangle(130, 675, 770, 10, WHITE);
+            DrawCircle(135, 680, 10, RED);
+
             DrawRectangleLines(920, 10, 350, 350, WHITE);
             DrawText("Song: PARTY In PSPACE", 920, 370, 20, WHITE);
             DrawText("Artist: tnshi", 920, 390, 20, WHITE);
