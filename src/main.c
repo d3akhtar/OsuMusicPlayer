@@ -3,6 +3,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raylib/raygui.h>
 
+#include <tinyfiledialogs.h>
+
 int main()
 {
     InitWindow(1280, 720, "Osu Music Player");
@@ -24,6 +26,9 @@ int main()
     int songListIndex = 0;
     int songListActive = 0;
 
+    char const * osuPath = "{SELECT OSU! PATH}";
+    // char const * errorMessage = "Invalid osu! Path";
+    char const * errorMessage = "";
     bool showSelectOsuPathDialog = true;
 
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
@@ -112,16 +117,20 @@ int main()
 
             if (showSelectOsuPathDialog) {
                 GuiPanel((Rectangle) {140, 230, 1000, 200}, "Select osu! Path");
+                DrawText(errorMessage, 540, 263, 18, RED);
                 DrawText("Path:", 180, 290, 60, BLACK);
-                GuiTextBox((Rectangle) {350, 290, 650, 60}, "{Path to osu! location}", 120, false);
+                DrawRectangleLines(350, 290, 650, 60, BLACK);
+                DrawText(osuPath, 360, 310, 20, (Color){133, 90, 129, 255});
 
                 if (GuiButton((Rectangle) {1010, 290, 90, 60}, "Browse")) {
-                    
+                    osuPath = tinyfd_selectFolderDialog("Select osu! location", "");
                 }
 
+                GuiSetState(strlen(errorMessage) == 0 ? STATE_NORMAL : STATE_DISABLED);
                 if (GuiButton((Rectangle){150, 370, 980, 50}, "Confirm")) {
                     showSelectOsuPathDialog = false;
                 }
+                GuiSetState(STATE_NORMAL);
             }
             
         EndDrawing();

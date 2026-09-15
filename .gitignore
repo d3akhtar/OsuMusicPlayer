@@ -1,3 +1,5 @@
 *.exe
 .clangd
 *.obj
+app
+.DS_Store

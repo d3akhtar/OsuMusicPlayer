@@ -7,4 +7,4 @@ SET links=/link /LIBPATH:lib/windows raylib.lib opengl32.lib gdi32.lib winmm.lib
 
 echo "Building..."
 
-cl /EHsc /std:c17 %includes% src/*.c %links% /SUBSYSTEM:CONSOLE
+cl /EHsc /std:c17 %includes% src/*.c external/*.c %links% /SUBSYSTEM:CONSOLE
