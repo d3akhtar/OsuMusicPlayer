@@ -1,5 +1,6 @@
 #include "fft.h"
 #include "gui.h"
+#include "utils.h"
 #include <math.h>
 #include <raylib/raylib.h>
 
@@ -37,6 +38,9 @@ int main()
 
     AudioStream audioStream = LoadAudioStream(SAMPLE_RATE, PER_SAMPLE_BIT_DEPTH, MONO);
     PlayAudioStream(audioStream);
+
+    int audioStreamTotalSeconds = wav.frameCount / SAMPLE_RATE;
+    int currentAudioStreamTimeSeconds = 0;
 
     int fftHistoryLen = (int)ceilf(FFT_HISTORICAL_SMOOTHING_DUR/WINDOW_TIME)+1;
     FFTData fftData = {
@@ -84,6 +88,7 @@ int main()
     while (!WindowShouldClose())
     {
         songProgress = (float)wavCursor / (float)wav.frameCount;
+        currentAudioStreamTimeSeconds = audioStreamTotalSeconds*songProgress;
         
         SetAudioStreamVolume(audioStream, volumeValue);
 
@@ -132,7 +137,7 @@ int main()
             GuiDrawIconButton(ICON_PLAYER_NEXT, 510, 630, 2, WHITE);
             GuiDrawIconButton(ICON_REDO, 860, 630, 2, WHITE);
             
-            DrawText("0:01/10:00", 25, 670, 20, WHITE);
+            DrawText(FormatTimerProgress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, WHITE);
             GuiDrawMusicProgressBar(130, 675, 770, 10, songProgress, WHITE, GREEN);
 
             DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
