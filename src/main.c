@@ -24,6 +24,8 @@ int main()
     int songListIndex = 0;
     int songListActive = 0;
 
+    Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
+
     while (!WindowShouldClose())
     {
         ClearBackground(BLACK);
@@ -46,6 +48,7 @@ int main()
             DrawRectangle(130, 675, 770, 10, WHITE);
             DrawCircle(135, 680, 10, RED);
 
+            DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
             DrawRectangleLines(920, 10, 350, 350, WHITE);
             DrawText("Song: PARTY In PSPACE", 920, 370, 20, WHITE);
             DrawText("Artist: tnshi", 920, 390, 20, WHITE);
