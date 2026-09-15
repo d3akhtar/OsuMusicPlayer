@@ -1,4 +1,5 @@
 #include "fft.h"
+#include "gui.h"
 #include <math.h>
 #include <raylib/raylib.h>
 
@@ -9,6 +10,8 @@
 
 int main()
 {
+    Vector2 mousePos = {0,0};
+        
     InitWindow(1280, 720, "Osu Music Player");
     SetTargetFPS(60);
 
@@ -53,7 +56,7 @@ int main()
     short chunkSamples[AUDIO_STREAM_RING_BUFFER_SIZE] = {0};
     float audioSamples[FFT_WINDOW_SIZE] = {0};
 
-    float volumeValue = 0.0f;
+    float volumeValue = 1.0f;
     
     float songProgress = 0.0f;
 
@@ -74,11 +77,19 @@ int main()
     char const * errorMessage = "";
     bool showSelectOsuPathDialog = false;
 
+    bool paused = false;
+
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
 
     while (!WindowShouldClose())
     {
-        while (IsAudioStreamProcessed(audioStream))
+        songProgress = (float)wavCursor / (float)wav.frameCount;
+        
+        SetAudioStreamVolume(audioStream, volumeValue);
+
+        mousePos = GetMousePosition();
+        
+        while (!paused && IsAudioStreamProcessed(audioStream))
         {
             for (int i = 0; i < AUDIO_STREAM_RING_BUFFER_SIZE; i++)
             {
@@ -112,17 +123,17 @@ int main()
             DrawRectangleLines(20, 20, 880, 580, GRAY);
             DrawRectangle(10, 620, 900, 80, GRAY);
 
-            GuiDrawIcon(122, 25, 630, 2, WHITE);
+            GuiDrawIcon(ICON_AUDIO, 25, 630, 2, WHITE);
             GuiSliderBar((Rectangle){65, 637, 200, 15}, "", "", &volumeValue, 0.0f, 1.0f);
-            GuiDrawIcon(129, 360, 630, 2, WHITE);
-            GuiDrawIcon(131, 410, 630, 2, WHITE);
-            GuiDrawIcon(132, 460, 630, 2, WHITE);
-            GuiDrawIcon(134, 510, 630, 2, WHITE);
-            GuiDrawIcon(58, 860, 630, 2, WHITE);
+
+            GuiDrawIconButton(ICON_PLAYER_PREVIOUS, 360, 630, 2, WHITE);
+            if (GuiDrawIconButton(ICON_PLAYER_PLAY, 410, 630, 2, paused ? WHITE : GREEN)) paused = false;
+            if (GuiDrawIconButton(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : WHITE)) paused = true;
+            GuiDrawIconButton(ICON_PLAYER_NEXT, 510, 630, 2, WHITE);
+            GuiDrawIconButton(ICON_REDO, 860, 630, 2, WHITE);
             
             DrawText("0:01/10:00", 25, 670, 20, WHITE);
-            DrawRectangle(130, 675, 770, 10, WHITE);
-            DrawCircle(135, 680, 10, RED);
+            GuiDrawMusicProgressBar(130, 675, 770, 10, songProgress, WHITE, GREEN);
 
             DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
             DrawRectangleLines(920, 10, 350, 350, WHITE);
