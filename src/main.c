@@ -1,3 +1,5 @@
+#include "fft.h"
+#include <math.h>
 #include <raylib/raylib.h>
 
 #define RAYGUI_IMPLEMENTATION
@@ -9,6 +11,47 @@ int main()
 {
     InitWindow(1280, 720, "Osu Music Player");
     SetTargetFPS(60);
+
+    int screenWidth = GetScreenWidth(), screenHeight = GetScreenHeight();
+    int fftRenderBufWidth = 880, fftRenderBufHeight = 580;
+
+    Image fftImage = GenImageColor(BUFFER_SIZE, TEXTURE_HEIGHT, WHITE);
+    Texture2D fftTexture = LoadTextureFromImage(fftImage);
+    RenderTexture2D bufA = LoadRenderTexture(fftRenderBufWidth, fftRenderBufHeight);
+    Vector2 iResolution = { (float)screenHeight, (float)screenHeight };
+
+    Shader fftShader = LoadShader(0, "./resources/shaders/fft.fs");
+    int iResolutionLoc = GetShaderLocation(fftShader, "iResolution");
+    int iChannel0Loc = GetShaderLocation(fftShader, "iChannel0");
+    SetShaderValue(fftShader, iResolutionLoc, &iResolution, SHADER_UNIFORM_VEC2);
+    SetShaderValueTexture(fftShader, iChannel0Loc, fftTexture);
+
+    InitAudioDevice();
+    SetAudioStreamBufferSizeDefault(AUDIO_STREAM_RING_BUFFER_SIZE);
+
+    Wave wav = LoadWave("./resources/music/testSong.mp3");
+    WaveFormat(&wav, SAMPLE_RATE, PER_SAMPLE_BIT_DEPTH, MONO);
+
+    AudioStream audioStream = LoadAudioStream(SAMPLE_RATE, PER_SAMPLE_BIT_DEPTH, MONO);
+    PlayAudioStream(audioStream);
+
+    int fftHistoryLen = (int)ceilf(FFT_HISTORICAL_SMOOTHING_DUR/WINDOW_TIME)+1;
+    FFTData fftData = {
+        .spectrum = RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
+        .workBuffer = RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
+        .prevMagnitudes = RL_CALLOC(BUFFER_SIZE, sizeof(float)),
+        .fftHistory = RL_CALLOC(fftHistoryLen, sizeof(float[BUFFER_SIZE])),
+        .fftHistoryLen = fftHistoryLen,
+        .historyPos = 0,
+        .lastFftTime = 0.0f,
+        .tapbackPos = 0.01f
+    };
+
+    unsigned int wavCursor = 0;
+    short const *wavPCM16 = wav.data;
+
+    short chunkSamples[AUDIO_STREAM_RING_BUFFER_SIZE] = {0};
+    float audioSamples[FFT_WINDOW_SIZE] = {0};
 
     float volumeValue = 0.0f;
     
@@ -29,15 +72,41 @@ int main()
     char const * osuPath = "{SELECT OSU! PATH}";
     // char const * errorMessage = "Invalid osu! Path";
     char const * errorMessage = "";
-    bool showSelectOsuPathDialog = true;
+    bool showSelectOsuPathDialog = false;
 
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
 
     while (!WindowShouldClose())
     {
+        while (IsAudioStreamProcessed(audioStream))
+        {
+            for (int i = 0; i < AUDIO_STREAM_RING_BUFFER_SIZE; i++)
+            {
+                int left = (wav.channels == 2) ? wavPCM16[wavCursor*2 + 0] : wavPCM16[wavCursor];
+                int right = (wav.channels == 2) ? wavPCM16[wavCursor*2 + 1] : left;
+                chunkSamples[i] = (short)((left + right) / 2);
+
+                if (++wavCursor >= wav.frameCount) wavCursor = 0;
+            }
+
+            UpdateAudioStream(audioStream, chunkSamples, AUDIO_STREAM_RING_BUFFER_SIZE);
+
+            for (int i = 0; i < FFT_WINDOW_SIZE; i++)
+                audioSamples[i] = (chunkSamples[i*2] + chunkSamples[i*2+1]) * 0.5f/32767.0f;
+        }
+
+        CaptureFrame(&fftData, audioSamples);
+        RenderFrame(&fftData, &fftImage);
+        UpdateTexture(fftTexture, fftImage.data);
+        
         ClearBackground(BLACK);
         
         BeginDrawing();
+
+            BeginShaderMode(fftShader);
+                SetShaderValueTexture(fftShader, iChannel0Loc, fftTexture);
+                DrawTextureRec(bufA.texture, (Rectangle){0, 0, fftRenderBufWidth, -fftRenderBufHeight}, (Vector2) {20,20}, WHITE);
+            EndShaderMode();
 
             DrawRectangleLines(10, 10, 900, 600, WHITE);
             DrawRectangleLines(20, 20, 880, 580, GRAY);
@@ -135,6 +204,19 @@ int main()
             
         EndDrawing();
     }
+
+    UnloadShader(fftShader);
+    UnloadRenderTexture(bufA);
+    UnloadTexture(fftTexture);
+    UnloadImage(fftImage);
+    UnloadAudioStream(audioStream);
+    UnloadWave(wav);
+    CloseAudioDevice();
+
+    RL_FREE(fftData.spectrum);
+    RL_FREE(fftData.workBuffer);
+    RL_FREE(fftData.prevMagnitudes);
+    RL_FREE(fftData.fftHistory);
 
     CloseWindow();
     return 0;

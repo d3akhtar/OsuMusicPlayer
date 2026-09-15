@@ -1,6 +1,6 @@
 #version 330
 
-in vec2 fragTexCoord
+in vec2 fragTexCoord;
 in vec4 fragColor;
 
 out vec4 finalColor;
@@ -8,8 +8,8 @@ out vec4 finalColor;
 uniform vec2 iResolution;
 uniform sampler2D iChannel0;
 
-const vec4 BLACK = vec4(0.0, 0.0, 0.0, 1.0);
-const vec4 WHITE = vec4(1.0);
+const vec4 BLACK = vec4(0.0, 1.0, 0.75, 1.0);
+const vec4 WHITE = vec4(0.0, 0.0, 0.0, 1.0);
 const float FFT_ROW = 0.0;
 const float N_BINS = 512.0;
 
