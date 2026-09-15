@@ -24,6 +24,8 @@ int main()
     int songListIndex = 0;
     int songListActive = 0;
 
+    bool showSelectOsuPathDialog = true;
+
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
 
     while (!WindowShouldClose())
@@ -69,7 +71,10 @@ int main()
             if (GuiButton((Rectangle) {920, 660, 350, 40}, "Browse")) showBrowseSongList = true;
 
             if (showBrowseSongList) {
-                GuiWindowBox((Rectangle) {340, 10, 600, 700 }, "Browse songs");
+                if (GuiWindowBox((Rectangle) {340, 10, 600, 700 }, "Browse songs") == RESULT_PRESSED) {
+                    showBrowseSongList = false;
+                }
+                
                 if (GuiTextBox((Rectangle) {340, 34, 450, 30}, searchBrowseSongList, 20, searchBrowseSongListEdit)) {
                     searchBrowseSongList[0] = '\0';
                     searchBrowseSongListEdit = !searchBrowseSongListEdit;
@@ -103,6 +108,20 @@ int main()
                 GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_NORMAL, 0);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_WIDTH, 0);
+            }
+
+            if (showSelectOsuPathDialog) {
+                GuiPanel((Rectangle) {140, 230, 1000, 200}, "Select osu! Path");
+                DrawText("Path:", 180, 290, 60, BLACK);
+                GuiTextBox((Rectangle) {350, 290, 650, 60}, "{Path to osu! location}", 120, false);
+
+                if (GuiButton((Rectangle) {1010, 290, 90, 60}, "Browse")) {
+                    
+                }
+
+                if (GuiButton((Rectangle){150, 370, 980, 50}, "Confirm")) {
+                    showSelectOsuPathDialog = false;
+                }
             }
             
         EndDrawing();
