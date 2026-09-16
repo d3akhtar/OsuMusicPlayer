@@ -68,7 +68,8 @@ int main()
 
     bool showBrowseSongList = false;
     bool searchBrowseSongListEdit = false;
-    char* searchBrowseSongList = "";
+    int const searchBrowseSongListQueryMaxSize = 1024;
+    char searchBrowseSongList[1024] = {'\0'};
 
     int collectionDropdownOption = 0;
     bool collectionDropdownIsSelecting = false;
@@ -165,7 +166,7 @@ int main()
                     showBrowseSongList = false;
                 }
                 
-                if (GuiTextBox((Rectangle) {340, 34, 450, 30}, searchBrowseSongList, 20, searchBrowseSongListEdit)) {
+                if (GuiTextBox((Rectangle) {340, 34, 450, 30}, searchBrowseSongList, searchBrowseSongListQueryMaxSize, searchBrowseSongListEdit)) {
                     searchBrowseSongList[0] = '\0';
                     searchBrowseSongListEdit = !searchBrowseSongListEdit;
                 }
@@ -174,30 +175,30 @@ int main()
                     DrawText("Search songs...", 345, 40, 18, GRAY);
                 }
 
-                GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-                GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 10);
-                switch (GuiDropdownBox((Rectangle) {790, 34, 150, 30}, "All; Collection 1; Collection 2; Collection 3333333333333", &collectionDropdownOption, collectionDropdownIsSelecting)) {
-                    case RESULT_CHANGED:
-                        collectionDropdownIsSelecting = false;
-                        break;
-                    case RESULT_PRESSED:
-                        collectionDropdownIsSelecting = true;
-                }
-
-                GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-                GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 0);
-
                 GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
                 GuiSetStyle(LISTVIEW, TEXT_PADDING, 10);
                 GuiSetStyle(LISTVIEW, BORDER_WIDTH, 2);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_NORMAL, 1);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_WIDTH, 1);
-                GuiListView((Rectangle) {340, 60, 600, 656}, "Song 1;Song 2;Song 3;Song 4;Song 5;", &songListIndex, &songListActive);
+                GuiListView((Rectangle) {340, 60, 600, 656}, "Song 1;Song 2;Song 3;Song 4;Song 5", &songListIndex, &songListActive);
                 GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
                 GuiSetStyle(LISTVIEW, TEXT_PADDING, 0);
                 GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_NORMAL, 0);
                 GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_WIDTH, 0);
+
+                GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+                GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 10);
+                switch (GuiDropdownBox((Rectangle) {790, 34, 150, 28}, "All; Collection 1; Collection 2; Collection 3333333333333", &collectionDropdownOption, collectionDropdownIsSelecting)) {
+                    case RESULT_CHANGED:
+                        collectionDropdownIsSelecting = false;
+                        break;
+                    case RESULT_PRESSED:
+                        collectionDropdownIsSelecting = true;
+                        break;
+                }
+                GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+                GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 0);
             }
 
             if (showSelectOsuPathDialog) {

@@ -29,7 +29,7 @@ typedef struct FFTData {
   FFTComplex *spectrum;
   FFTComplex *workBuffer;
   float *prevMagnitudes;
-  float (*fftHistory)[1];
+  float (*fftHistory)[BUFFER_SIZE];
   int fftHistoryLen;
   int historyPos;
   double lastFftTime;
