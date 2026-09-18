@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdio>
 #include <stdio.h>
 
 #define INT_FLOAT_PAIR_SIZE 10
@@ -36,7 +35,7 @@ int ReadInt(OsuFile* file);
 long ReadLong(OsuFile* file); 
 float ReadSingle(OsuFile* file); 
 double ReadDouble(OsuFile* file); 
-bool ReadBool(OsuFile* file); 
+int ReadBool(OsuFile* file); 
 long ReadULEB128(OsuFile* file); 
 char* ReadString(OsuFile* file); 
 long Tell(OsuFile* file);

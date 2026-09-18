@@ -3,7 +3,7 @@
 OsuFile OpenOsuFile(char const * path)
 {
   OsuFile file;
-  fopen_s(&file.fptr, path, "rb");
+  file.fptr = fopen(path, "rb");
 
   if (file.fptr == NULL) return file;
   
