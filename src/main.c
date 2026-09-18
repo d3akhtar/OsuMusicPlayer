@@ -94,6 +94,7 @@ int main()
     bool showSelectOsuPathDialog = false;
 
     bool paused = false;
+    bool musicProgressBarChanging = false;
 
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
 
@@ -106,7 +107,7 @@ int main()
 
         mousePos = GetMousePosition();
         
-        while (!paused && IsAudioStreamProcessed(audioStream))
+        while (!paused && !musicProgressBarChanging && IsAudioStreamProcessed(audioStream))
         {
             for (int i = 0; i < AUDIO_STREAM_RING_BUFFER_SIZE; i++)
             {
@@ -149,7 +150,10 @@ int main()
             GuiDrawIconButton(ICON_REDO, 860, 630, 2, CYAN);
             
             DrawText(FormatTimerProgress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);
-            GuiDrawMusicProgressBar(130, 675, 770, 10, songProgress, LIGHTGRAY, (Color){22,201,201,255});
+            if (GuiDrawMusicProgressBar(130, 675, 770, 10, &songProgress, LIGHTGRAY, (Color){22,201,201,255})) {
+                musicProgressBarChanging = true;
+                wavCursor = songProgress * (float)wav.frameCount;
+            } else musicProgressBarChanging = false;
 
             DrawRectangle(915, 5, 360, 360, BLACK);
             DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
