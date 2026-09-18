@@ -9,12 +9,24 @@
 
 #include <tinyfiledialogs.h>
 
+Color const CYAN = (Color){22,255,255,255};
+
 int main()
 {
     Vector2 mousePos = {0,0};
         
     InitWindow(1280, 720, "Osu Music Player");
     SetTargetFPS(60);
+
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ColorToInt((Color){244, 226, 245, 255}));
+    GuiSetStyle(DEFAULT, BORDER_COLOR_NORMAL, ColorToInt((Color){61, 61, 61, 255}));
+    GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt((Color){0, 0, 0, 255}));
+    GuiSetStyle(DEFAULT, LIST_ITEMS_BORDER_NORMAL, ColorToInt(BLACK));
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt((Color){255, 163, 217, 255}));
+    GuiSetStyle(SLIDER, BASE_COLOR_NORMAL, ColorToInt(GRAY));
+    GuiSetStyle(STATUSBAR, BASE_COLOR_NORMAL, ColorToInt((Color){197, 140, 250, 255}));
+    GuiSetStyle(DEFAULT, BORDER_WIDTH, 2);
+    GuiSetStyle(DROPDOWNBOX, BASE_COLOR_NORMAL, ColorToInt((Color){244, 226, 245, 255}));
 
     int screenWidth = GetScreenWidth(), screenHeight = GetScreenHeight();
     int fftRenderBufWidth = 880, fftRenderBufHeight = 580;
@@ -78,7 +90,6 @@ int main()
     int songListActive = 0;
 
     char const * osuPath = "{SELECT OSU! PATH}";
-    // char const * errorMessage = "Invalid osu! Path";
     char const * errorMessage = "";
     bool showSelectOsuPathDialog = false;
 
@@ -116,37 +127,36 @@ int main()
         RenderFrame(&fftData, &fftImage);
         UpdateTexture(fftTexture, fftImage.data);
         
-        ClearBackground(BLACK);
+        ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
         
         BeginDrawing();
+            DrawRectangle(15, 15, 890, 590, BLACK);
+            DrawRectangleRounded((Rectangle){10, 620, 900, 80}, 0.2f, 1, (Color){143, 119, 141, 255});
+            DrawRectangleRoundedLinesEx((Rectangle){10, 620, 900, 80}, 0.2f, 1, 2, BLACK);
 
             BeginShaderMode(fftShader);
                 SetShaderValueTexture(fftShader, iChannel0Loc, fftTexture);
                 DrawTextureRec(bufA.texture, (Rectangle){0, 0, fftRenderBufWidth, -fftRenderBufHeight}, (Vector2) {20,20}, WHITE);
             EndShaderMode();
 
-            DrawRectangleLines(10, 10, 900, 600, WHITE);
-            DrawRectangleLines(20, 20, 880, 580, GRAY);
-            DrawRectangle(10, 620, 900, 80, GRAY);
-
-            GuiDrawIcon(ICON_AUDIO, 25, 630, 2, WHITE);
+            GuiDrawIcon(ICON_AUDIO, 25, 630, 2, CYAN);
             GuiSliderBar((Rectangle){65, 637, 200, 15}, "", "", &volumeValue, 0.0f, 1.0f);
 
-            GuiDrawIconButton(ICON_PLAYER_PREVIOUS, 360, 630, 2, WHITE);
-            if (GuiDrawIconButton(ICON_PLAYER_PLAY, 410, 630, 2, paused ? WHITE : GREEN)) paused = false;
-            if (GuiDrawIconButton(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : WHITE)) paused = true;
-            GuiDrawIconButton(ICON_PLAYER_NEXT, 510, 630, 2, WHITE);
-            GuiDrawIconButton(ICON_REDO, 860, 630, 2, WHITE);
+            GuiDrawIconButton(ICON_PLAYER_PREVIOUS, 360, 630, 2, CYAN);
+            if (GuiDrawIconButton(ICON_PLAYER_PLAY, 410, 630, 2, paused ? CYAN : GREEN)) paused = false;
+            if (GuiDrawIconButton(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : CYAN)) paused = true;
+            GuiDrawIconButton(ICON_PLAYER_NEXT, 510, 630, 2, CYAN);
+            GuiDrawIconButton(ICON_REDO, 860, 630, 2, CYAN);
             
-            DrawText(FormatTimerProgress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, WHITE);
-            GuiDrawMusicProgressBar(130, 675, 770, 10, songProgress, WHITE, GREEN);
+            DrawText(FormatTimerProgress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);
+            GuiDrawMusicProgressBar(130, 675, 770, 10, songProgress, LIGHTGRAY, (Color){22,201,201,255});
 
+            DrawRectangle(915, 5, 360, 360, BLACK);
             DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
-            DrawRectangleLines(920, 10, 350, 350, WHITE);
-            DrawText("Song: PARTY In PSPACE", 920, 370, 20, WHITE);
-            DrawText("Artist: tnshi", 920, 390, 20, WHITE);
+            DrawText("Song: PARTY In PSPACE", 920, 370, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+            DrawText("Artist: tnshi", 920, 390, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
 
-            DrawText("Playlist: tnshi songs", 920, 420, 20, WHITE);
+            DrawText("Playlist: tnshi songs", 920, 420, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
             GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
             GuiSetStyle(LISTVIEW, TEXT_PADDING, 10);
             GuiSetStyle(LISTVIEW, BORDER_WIDTH, 2);
@@ -172,7 +182,7 @@ int main()
                 }
 
                 if (!searchBrowseSongListEdit && strlen(searchBrowseSongList) == 0) {
-                    DrawText("Search songs...", 345, 40, 18, GRAY);
+                    DrawText("Search songs...", 345, 40, 18, BLACK);
                 }
 
                 GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
