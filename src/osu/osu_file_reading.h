@@ -24,12 +24,14 @@ typedef struct Beatmap {
 
 typedef struct Collection {
   char const * name;
+  int nBeatmapHashes;
   char const ** beatmapHashes;
 } Collection;
 
 OsuFile OpenOsuFile(char const * path);
 char ReadByte(OsuFile* file);
 char* ReadBytes(OsuFile* file, int n);
+void SkipBytes(OsuFile* file, int n);
 short ReadShort(OsuFile* file);
 int ReadInt(OsuFile* file);
 long ReadLong(OsuFile* file); 
@@ -38,5 +40,6 @@ double ReadDouble(OsuFile* file);
 int ReadBool(OsuFile* file); 
 long ReadULEB128(OsuFile* file); 
 char* ReadString(OsuFile* file); 
+void SkipString(OsuFile* file);
 long Tell(OsuFile* file);
 void CloseOsuFile(OsuFile* file);

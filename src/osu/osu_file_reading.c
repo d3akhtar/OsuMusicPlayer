@@ -1,4 +1,7 @@
 #include "osu_file_reading.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 OsuFile OpenOsuFile(char const * path)
 {
@@ -20,9 +23,16 @@ char ReadByte(OsuFile* file)
 
 char* ReadBytes(OsuFile* file, int n)
 {
-  char* res;
-  fread(&res, sizeof(char), n, file->fptr);
+  char* res = malloc(n * sizeof(char));
+  fread(res, sizeof(char), n, file->fptr);
   return res;  
+}
+
+void SkipBytes(OsuFile* file, int n)
+{
+  if (fseek(file->fptr, n, SEEK_CUR) != 0) {
+    fprintf(stderr, "Error occurred while seeking\n");
+  }
 }
 
 short ReadShort(OsuFile* file)
@@ -60,10 +70,10 @@ double ReadDouble(OsuFile* file)
   return res;    
 }
 
-bool ReadBool(OsuFile* file)
+int ReadBool(OsuFile* file)
 {
-  bool res;
-  fread(&res, sizeof(bool), 1, file->fptr);
+  char res;
+  fread(&res, sizeof(char), 1, file->fptr);
   return res;      
 }
 
@@ -71,10 +81,10 @@ long ReadULEB128(OsuFile* file)
 {
   long res = 0;
   int shift = 0;
-  while (true)
+  while (1)
   {
     char b = ReadByte(file);
-    bool isLastByte = (b & 0x80) == 0;
+    int isLastByte = (b & 0x80) == 0;
     res |= (long)(b & 0x7F) << shift;
     if (isLastByte) {
       break;
@@ -89,7 +99,12 @@ long ReadULEB128(OsuFile* file)
 char* ReadString(OsuFile* file)
 {
   char prefix = ReadByte(file);
-  if (prefix == 0x00 || prefix != 0x11) {
+  if (prefix == 0x00) {
+    return "";
+  }
+
+  if (prefix != 0x0b) {
+    fprintf(stderr, "If prefix byte isn't 0x00, it should be 0x0b, instead it is: 0x%02x\n", prefix);
     return NULL;
   }
 
@@ -97,6 +112,17 @@ char* ReadString(OsuFile* file)
   char* res = ReadBytes(file, len);
 
   return res;
+}
+
+void SkipString(OsuFile* file)
+{
+  char prefix = ReadByte(file);
+  if (prefix == 0x00 || prefix != 0x0b) {
+    return;
+  }
+
+  long len = ReadULEB128(file);
+  SkipBytes(file, len);
 }
 
 long Tell(OsuFile* file)
