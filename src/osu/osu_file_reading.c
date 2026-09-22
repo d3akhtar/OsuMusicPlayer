@@ -109,7 +109,10 @@ char* ReadString(OsuFile* file)
   }
 
   long len = ReadULEB128(file);
-  char* res = ReadBytes(file, len);
+
+  char* res = malloc((len+1) * sizeof(char));
+  fread(res, sizeof(char), len, file->fptr);
+  res[len] = '\0';
 
   return res;
 }
