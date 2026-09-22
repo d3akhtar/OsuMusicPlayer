@@ -3,8 +3,8 @@
 #include "music/songs.h"
 
 typedef struct Playlist {
-  int currentSong;
+  int currentSong, nSongs;
   Song* songs;
 } Playlist;
 
-Playlist CreateFullPlaylist(Song* songs);
+Playlist CreatePlaylistForSongs(Song* songs, int nSongs);

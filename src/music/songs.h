@@ -3,11 +3,9 @@
 #include "osu/osu_file_reading.h"
 
 typedef struct Song {
+  char const * songInfo;
   char const * audioFilePath;
-  char const * name;
-  char const * artist;
-  int beatmapId;
-  char const ** beatmapHashes;
 } Song;
 
-Song* ExtractSongs(Beatmap* beatmaps);
+Song* ExtractSongs(Beatmap* beatmaps, int nBeatmaps, int *nSongs);
+Song* ExtractSongsForCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps, int *nSongs);
