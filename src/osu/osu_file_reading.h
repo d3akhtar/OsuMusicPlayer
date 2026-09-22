@@ -16,6 +16,7 @@ typedef struct Beatmap {
   char const * songTitle;
   char const * audioFileName;
 	char const * mD5Hash;
+	char const * osuFileName;
 	int beatmapId;
 	char const * songSource;
 	char const * songTags;

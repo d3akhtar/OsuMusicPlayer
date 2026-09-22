@@ -1,9 +1,11 @@
 #include "music/playlist.h"
 #include "music/songs.h"
 #include "osu/osu_db.h"
+#include "utils/string.h"
 #include <osu/osu_file_reading.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void PrintBeatmap(Beatmap* beatmap);
 void PrintCollection(Collection* collection);
@@ -15,6 +17,8 @@ int TestReadingOsuCollections(char const *path);
 int TestExtractSongs(Beatmap* beatmaps, int nBeatmaps);
 int TestExtractSongsFromCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps);
 int TestCreatePlaylistForSongs(Song* songs, int nSongs);
+int TestExtractBackgroundFileName(char const * path);
+int TestSplitIntoLines(char const * str);
 
 int main()
 {
@@ -22,6 +26,7 @@ int main()
   
   char const * osuDbPath = "./tests/data/osu!.db";
   char const * collectionsPath = "./tests/data/collection.db";
+  char const * beatmapInfoPath = "./tests/data/testBeatmapInfoFile.osu";
 
   if (!TestReadingOsuDb(osuDbPath)) {
     fprintf(stderr, "TestReadingOsuDb failed\n");
@@ -64,6 +69,16 @@ int main()
   if (!TestExtractSongsFromCollection(&collections[0], beatmaps, nBeatmaps)) {
     fprintf(stderr, "TestExtractSongsFromCollection failed\n");
     exit(-1);    
+  }
+
+  if (!TestExtractBackgroundFileName(beatmapInfoPath)) {
+    fprintf(stderr, "TestExtractBackgroundFileName failed\n");
+    exit(-1);    
+  }
+
+  if (!TestSplitIntoLines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
+    fprintf(stderr, "TestSplitIntoLines failed\n");
+    exit(-1);   
   }
 }
 
@@ -184,6 +199,39 @@ int TestCreatePlaylistForSongs(Song* songs, int nSongs)
 
   Playlist playlist = CreatePlaylistForSongs(songs, nSongs);
   PrintPlaylist(&playlist);
+
+  return 1;
+}
+
+int TestExtractBackgroundFileName(char const * path)
+{
+  printf("== TestExtractBackgroundFileName(%s) ==\n", path);
+
+  char const * backgroundFileName = ExtractBackgroundFileName(path);
+
+  if (backgroundFileName == NULL) {
+    fprintf(stderr, "Failed to get background file name\n");
+    return 0;
+  }
+
+  printf("Retrieved background file name: %s\n", backgroundFileName);
+
+  return 1;
+}
+
+int TestSplitIntoLines(char const * str)
+{
+  printf("== TestSplitIntoLines(%s) ==\n", str);
+
+  int nLines;
+  char ** lines = SplitIntoLines(str, strlen(str), &nLines);
+
+  printf("Got %d lines:\n", nLines);
+
+  for (int i = 0; i < nLines; i++)
+  {
+    printf("(%d): %s\n", i+1, lines[i]);
+  }
 
   return 1;
 }

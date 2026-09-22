@@ -1,7 +1,12 @@
 #include "osu_db.h"
 #include "osu/osu_file_reading.h"
+#include "utils/string.h"
+#include <_stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLines);
 
 Beatmap* ReadBeatmaps(OsuFile* file, int* nBeatmaps)
 {
@@ -48,7 +53,7 @@ Beatmap ReadBeatmap(OsuFile* file)
   SkipString(file);
   beatmap.audioFileName = ReadString(file);
   beatmap.mD5Hash = ReadString(file);
-  SkipString(file);
+  beatmap.osuFileName = ReadString(file);
   SkipBytes(file, 39);
   int n = ReadInt(file);
   SkipBytes(file, n * INT_FLOAT_PAIR_SIZE);
@@ -73,6 +78,57 @@ Beatmap ReadBeatmap(OsuFile* file)
   SkipBytes(file, 18);    
 
   return beatmap;
+}
+
+char const * ExtractBackgroundFileName(char const *beatmapInformationFilePath)
+{
+  FILE* fptr = fopen(beatmapInformationFilePath, "r");
+
+  if (fptr == NULL) {
+    fprintf(stderr, "Error while opening file %s\n", beatmapInformationFilePath);
+    return NULL;
+  }
+
+  while (!feof(fptr))
+  {
+    int nLines;
+    const char ** section = __read_section_from_beatmap_information_file(fptr, &nLines);
+    if (section != NULL && strstr(section[0], "[Events]") != NULL) {
+      for (int i = 1; i < nLines; i++)
+      {
+        if (strncmp(section[i], "0,0,", 4) == 0) {
+          size_t lineLen = strlen(section[i]);
+          char path[lineLen];
+          size_t pathLen = 0;
+          for (int j = 4; j < lineLen; j++)
+          {
+            if (section[i][j] == '"') continue;
+            if (section[i][j] == ',' || section[i][j] == '\n') break;
+
+            path[pathLen++] = section[i][j];
+          }
+
+          if (pathLen == 0) {
+            fclose(fptr);
+            return NULL;
+          }
+
+          char * res = malloc(pathLen+1);
+          memcpy(res, path, pathLen);
+          res[pathLen] = '\0';
+
+          fclose(fptr);
+          return res;
+        } 
+      }
+
+      fclose(fptr);
+      return NULL;
+    }
+  }
+
+  fclose(fptr);
+  return NULL;
 }
 
 Collection* ReadCollections(OsuFile* file, int* nCollections)
@@ -102,4 +158,24 @@ Collection ReadCollection(OsuFile* file)
   }
 
   return collection;
+}
+
+char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLines)
+{
+  int ch;
+  char buf[1 << 8];
+  while ((ch = fgetc(fptr)) != EOF) {
+    if (ch == '[') {
+      size_t len = 0;
+      buf[len++] = ch;
+      while ((ch = fgetc(fptr)) != '[' && ch != EOF)
+        buf[len++] = ch;
+     
+      fseek(fptr, -1, SEEK_CUR);
+
+      return (char const **)SplitIntoLines(buf, len, nLines);
+    }
+  }
+
+  return NULL;
 }
