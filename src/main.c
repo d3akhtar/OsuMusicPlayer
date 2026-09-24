@@ -1,5 +1,7 @@
 #include "fft.h"
 #include "gui.h"
+#include "ui/elements.h"
+#include "ui/music_playback.h"
 #include "utils/format.h"
 #include <math.h>
 #include <raylib/raylib.h>
@@ -9,7 +11,7 @@
 
 #include <tinyfiledialogs.h>
 
-Color const CYAN = (Color){22,255,255,255};
+static const Color CYAN = {22,255,255,255};
 
 int main()
 {

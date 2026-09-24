@@ -1,7 +1,6 @@
 #include "osu_db.h"
 #include "osu/osu_file_reading.h"
 #include "utils/string.h"
-#include <_stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +32,7 @@ Beatmap* read_beatmaps(OsuFile* file, int* nBeatmaps)
 
   printf("Reading %d beatmaps\n", *nBeatmaps);
 
-  Beatmap* beatmaps = malloc(*nBeatmaps * sizeof(Beatmap));
+  Beatmap* beatmaps = (Beatmap*)malloc(*nBeatmaps * sizeof(Beatmap));
   for (int i = 0; i < *nBeatmaps; i++) beatmaps[i] = __read_beatmap(file);
 
   return beatmaps;
@@ -43,7 +42,7 @@ Collection* read_collections(OsuFile* file, int* nCollections)
 {
   read_int(file);
   *nCollections = read_int(file);
-  Collection* collections = malloc(*nCollections * sizeof(Collection));
+  Collection* collections = (Collection*)malloc(*nCollections * sizeof(Collection));
 
   for (int i = 0; i < *nCollections; i++)
   {
@@ -70,8 +69,8 @@ char const * extract_bg_file_name(char const *beatmapInformationFilePath)
       for (int i = 1; i < nLines; i++)
       {
         if (strncmp(section[i], "0,0,", 4) == 0) {
-          size_t lineLen = strlen(section[i]);
-          char path[lineLen];
+          size_t const lineLen = strlen(section[i]);
+          char path[1 << 8];
           size_t pathLen = 0;
           for (int j = 4; j < lineLen; j++)
           {
@@ -86,7 +85,7 @@ char const * extract_bg_file_name(char const *beatmapInformationFilePath)
             return NULL;
           }
 
-          char * res = malloc(pathLen+1);
+          char* res = (char*)malloc(pathLen+1);
           memcpy(res, path, pathLen);
           res[pathLen] = '\0';
 
@@ -148,7 +147,7 @@ Collection __read_collection(OsuFile* file)
   Collection collection;
   collection.name = read_string(file);
   collection.nBeatmapHashes = read_int(file);
-  collection.beatmapHashes = malloc(collection.nBeatmapHashes * sizeof(char*));
+  collection.beatmapHashes = (char const **)malloc(collection.nBeatmapHashes * sizeof(char*));
   for (int i = 0; i < collection.nBeatmapHashes; i++)
   {
     char const * hash = read_string(file);
