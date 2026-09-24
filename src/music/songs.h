@@ -7,5 +7,5 @@ typedef struct Song {
   char const * audioFilePath;
 } Song;
 
-Song* ExtractSongs(Beatmap* beatmaps, int nBeatmaps, int *nSongs);
-Song* ExtractSongsForCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps, int *nSongs);
+Song* extract_songs(Beatmap* beatmaps, int nBeatmaps, int *nSongs);
+Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, int nBeatmaps, int *nSongs);

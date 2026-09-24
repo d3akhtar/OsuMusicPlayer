@@ -7,4 +7,4 @@ typedef struct Playlist {
   Song* songs;
 } Playlist;
 
-Playlist CreatePlaylistForSongs(Song* songs, int nSongs);
+Playlist create_playlist_for_songs(Song* songs, int nSongs);

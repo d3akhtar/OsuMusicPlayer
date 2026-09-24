@@ -3,21 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+static unsigned long __hash(char const *str);
 static Node* __new_node(char const * key, char const * value);
 static void __print_keys(HashMap *map);
 static Node* __find_node_with_key(HashMap *map, char const *key);
 
-unsigned long Hash(char const *str)
-{
-  unsigned long hash = 5381;
-  int c;
-  while ((c = *str++))
-    hash = ((hash << 5) + hash) / c;
-
-  return hash;  
-}
-
-void InitializeHashMap(HashMap* map)
+void init_hash_map(HashMap* map)
 {
   map->capacity = 1 << 20;
   map->nElems = 0;
@@ -25,9 +16,9 @@ void InitializeHashMap(HashMap* map)
   map->keys = (char**)malloc(map->capacity * sizeof(char*));
 }
 
-int Insert(HashMap* map, char const * key, char const * value)
+int insert(HashMap* map, char const * key, char const * value)
 {
-  int idx = Hash(key) % map->capacity;
+  int idx = __hash(key) % map->capacity;
 
   Node* node = __new_node(key, value);
   if (map->elems[idx] == NULL) map->elems[idx] = node;
@@ -42,9 +33,9 @@ int Insert(HashMap* map, char const * key, char const * value)
   return HASH_KEY_INSERTED;
 }
 
-int Delete(HashMap* map, char const * key)
+int remove_key(HashMap* map, char const * key)
 {
-  int idx = Hash(key) % map->capacity;
+  int idx = __hash(key) % map->capacity;
 
   Node *prevNode = NULL;
   Node *curNode = map->elems[idx];
@@ -72,9 +63,9 @@ int Delete(HashMap* map, char const * key)
   return HASH_KEY_NOT_FOUND;
 }
 
-int Search(HashMap* map, char const *key, char const ** value)
+int search(HashMap* map, char const *key, char const ** value)
 {
-  int idx = Hash(key) % map->capacity;
+  int idx = __hash(key) % map->capacity;
   Node *n = __find_node_with_key(map, key);
   if (n == NULL) return HASH_KEY_NOT_FOUND;
   else {
@@ -83,11 +74,21 @@ int Search(HashMap* map, char const *key, char const ** value)
   }
 }
 
-int Exists(HashMap* map, char const *key)
+int exists(HashMap* map, char const *key)
 {
   return __find_node_with_key(map, key) == NULL
     ? HASH_KEY_NOT_FOUND
     : HASH_KEY_FOUND;
+}
+
+static unsigned long __hash(char const *str)
+{
+  unsigned long hash = 5381;
+  int c;
+  while ((c = *str++))
+    hash = ((hash << 5) + hash) / c;
+
+  return hash;  
 }
 
 static Node* __new_node(char const * key, char const * value)
@@ -112,7 +113,7 @@ static void __print_keys(HashMap *map)
 
 static Node* __find_node_with_key(HashMap *map, char const *key)
 {
-  int idx = Hash(key) % map->capacity;
+  int idx = __hash(key) % map->capacity;
 
   Node *curNode = map->elems[idx];
   while (curNode != NULL)

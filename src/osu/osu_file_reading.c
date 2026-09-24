@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-OsuFile OpenOsuFile(char const * path)
+OsuFile open_osu_file(char const * path)
 {
   OsuFile file;
   file.fptr = fopen(path, "rb");
@@ -14,76 +14,76 @@ OsuFile OpenOsuFile(char const * path)
   return file;
 }
 
-char ReadByte(OsuFile* file)
+char read_byte(OsuFile* file)
 {
   char res;
   fread(&res, sizeof(char), 1, file->fptr);
   return res;
 }
 
-char* ReadBytes(OsuFile* file, int n)
+char* read_bytes(OsuFile* file, int n)
 {
   char* res = malloc(n * sizeof(char));
   fread(res, sizeof(char), n, file->fptr);
   return res;  
 }
 
-void SkipBytes(OsuFile* file, int n)
+void skip_bytes(OsuFile* file, int n)
 {
   if (fseek(file->fptr, n, SEEK_CUR) != 0) {
     fprintf(stderr, "Error occurred while seeking\n");
   }
 }
 
-short ReadShort(OsuFile* file)
+short read_short(OsuFile* file)
 {
   short res;
   fread(&res, sizeof(short), 1, file->fptr);
   return res;
 }
 
-int ReadInt(OsuFile* file)
+int read_int(OsuFile* file)
 {
   int res;
   fread(&res, sizeof(int), 1, file->fptr);
   return res;  
 }
 
-long ReadLong(OsuFile* file)
+long read_long(OsuFile* file)
 {
   long res;
   fread(&res, sizeof(long), 1, file->fptr);
   return res;    
 }
 
-float ReadSingle(OsuFile* file)
+float read_single(OsuFile* file)
 {
   float res;
   fread(&res, sizeof(float), 1, file->fptr);
   return res;  
 }
 
-double ReadDouble(OsuFile* file)
+double read_double(OsuFile* file)
 {
   double res;
   fread(&res, sizeof(double), 1, file->fptr);
   return res;    
 }
 
-int ReadBool(OsuFile* file)
+int read_bool(OsuFile* file)
 {
   char res;
   fread(&res, sizeof(char), 1, file->fptr);
   return res;      
 }
 
-long ReadULEB128(OsuFile* file)
+long read_uleb128(OsuFile* file)
 {
   long res = 0;
   int shift = 0;
   while (1)
   {
-    char b = ReadByte(file);
+    char b = read_byte(file);
     int isLastByte = (b & 0x80) == 0;
     res |= (long)(b & 0x7F) << shift;
     if (isLastByte) {
@@ -96,9 +96,9 @@ long ReadULEB128(OsuFile* file)
   return res;
 }
 
-char* ReadString(OsuFile* file)
+char* read_string(OsuFile* file)
 {
-  char prefix = ReadByte(file);
+  char prefix = read_byte(file);
   if (prefix == 0x00) {
     return "";
   }
@@ -108,7 +108,7 @@ char* ReadString(OsuFile* file)
     return NULL;
   }
 
-  long len = ReadULEB128(file);
+  long len = read_uleb128(file);
 
   char* res = malloc((len+1) * sizeof(char));
   fread(res, sizeof(char), len, file->fptr);
@@ -117,23 +117,23 @@ char* ReadString(OsuFile* file)
   return res;
 }
 
-void SkipString(OsuFile* file)
+void skip_string(OsuFile* file)
 {
-  char prefix = ReadByte(file);
+  char prefix = read_byte(file);
   if (prefix == 0x00 || prefix != 0x0b) {
     return;
   }
 
-  long len = ReadULEB128(file);
-  SkipBytes(file, len);
+  long len = read_uleb128(file);
+  skip_bytes(file, len);
 }
 
-long Tell(OsuFile* file)
+long tell(OsuFile* file)
 {
   return ftell(file->fptr);
 }
 
-void CloseOsuFile(OsuFile* file)
+void close_osu_file(OsuFile* file)
 {
   fclose(file->fptr);  
 }

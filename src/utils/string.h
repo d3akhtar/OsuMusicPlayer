@@ -2,4 +2,4 @@
 
 #include <stddef.h>
 
-char ** SplitIntoLines(char const * str, size_t len, int *nLines);
+char ** split_into_lines(char const * str, size_t len, int *nLines);

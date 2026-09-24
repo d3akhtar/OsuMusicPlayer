@@ -7,18 +7,18 @@
 
 Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths);
 
-Song* ExtractSongs(Beatmap* beatmaps, int nBeatmaps, int *nSongs)
+Song* extract_songs(Beatmap* beatmaps, int nBeatmaps, int *nSongs)
 {
   HashMap seenSongPaths;
-  InitializeHashMap(&seenSongPaths);
+  init_hash_map(&seenSongPaths);
 
   for (int i = 0; i < nBeatmaps; i++)
   {
     char const * audioFilePath = TextFormat("%s/%s", beatmaps[i].folderName, beatmaps[i].audioFileName);
 
-    if (Exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
+    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
       char const * songInfo = TextFormat("%s - %s", beatmaps[i].artistName, beatmaps[i].songTitle);
-      Insert(&seenSongPaths, audioFilePath, songInfo);
+      insert(&seenSongPaths, audioFilePath, songInfo);
     }
   }
 
@@ -28,29 +28,29 @@ Song* ExtractSongs(Beatmap* beatmaps, int nBeatmaps, int *nSongs)
   return songs;
 }
 
-Song* ExtractSongsForCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps, int *nSongs)
+Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, int nBeatmaps, int *nSongs)
 {
   HashMap beatmapHashes;
-  InitializeHashMap(&beatmapHashes);
+  init_hash_map(&beatmapHashes);
 
   for (int i = 0; i < collection->nBeatmapHashes; i++)
   {
-    if (Exists(&beatmapHashes, collection->beatmapHashes[i]) == HASH_KEY_NOT_FOUND)
-      Insert(&beatmapHashes, collection->beatmapHashes[i], "");
+    if (exists(&beatmapHashes, collection->beatmapHashes[i]) == HASH_KEY_NOT_FOUND)
+      insert(&beatmapHashes, collection->beatmapHashes[i], "");
   }
     
   HashMap seenSongPaths;
-  InitializeHashMap(&seenSongPaths);
+  init_hash_map(&seenSongPaths);
 
   for (int i = 0; i < nBeatmaps; i++)
   {
-    if (Exists(&beatmapHashes, beatmaps[i].mD5Hash) == HASH_KEY_NOT_FOUND) continue;
+    if (exists(&beatmapHashes, beatmaps[i].mD5Hash) == HASH_KEY_NOT_FOUND) continue;
     
     char const * audioFilePath = TextFormat("%s/%s", beatmaps[i].folderName, beatmaps[i].audioFileName);
 
-    if (Exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
+    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
       char const * songInfo = TextFormat("%s - %s", beatmaps[i].artistName, beatmaps[i].songTitle);
-      Insert(&seenSongPaths, audioFilePath, songInfo);
+      insert(&seenSongPaths, audioFilePath, songInfo);
     }
   }
 
@@ -71,7 +71,7 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
     char const * audioFilePath = seenSongPaths->keys[i];
     char const * songInfo;
    
-    if (Search(seenSongPaths, audioFilePath, &songInfo) == HASH_KEY_NOT_FOUND)
+    if (search(seenSongPaths, audioFilePath, &songInfo) == HASH_KEY_NOT_FOUND)
       fprintf(stderr, "Key: %s not found\n", audioFilePath);
 
     songs[i].songInfo = malloc(strlen(songInfo) + 1);

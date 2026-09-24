@@ -6,7 +6,7 @@ int compare(const void *a, const void *b) {
     return strcmp(((Song*)a)->songInfo, (((Song*)b)->songInfo));
 }
 
-Playlist CreatePlaylistForSongs(Song* songs, int nSongs)
+Playlist create_playlist_for_songs(Song* songs, int nSongs)
 {
   qsort(songs, nSongs, sizeof(Song), compare);
 

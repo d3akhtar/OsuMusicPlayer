@@ -36,7 +36,7 @@ typedef struct FFTData {
   float tapbackPos;
 } FFTData;
 
-void CaptureFrame(FFTData *data, float const * audioSamples);
-void RenderFrame(FFTData const *data, Image *fftImage);
-void CooleyTukeyFFTSlow(FFTComplex *spectrum, int n);
+void capture_frame(FFTData *data, float const * audioSamples);
+void render_frame(FFTData const *data, Image *fftImage);
+void cooley_tukey_fft_slow(FFTComplex *spectrum, int n);
 

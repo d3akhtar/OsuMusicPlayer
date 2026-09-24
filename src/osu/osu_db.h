@@ -2,9 +2,6 @@
 
 #include "osu_file_reading.h"
 
-Beatmap* ReadBeatmaps(OsuFile* file, int* nBeatmaps);
-Beatmap ReadBeatmap(OsuFile* file);
-char const * ExtractBackgroundFileName(char const *beatmapInformationFilePath);
-
-Collection* ReadCollections(OsuFile* file, int *nCollections);
-Collection ReadCollection(OsuFile* file);
+Beatmap* read_beatmaps(OsuFile* file, int* nBeatmaps);
+Collection* read_collections(OsuFile* file, int *nCollections);
+char const * extract_bg_file_name(char const *beatmapInformationFilePath);

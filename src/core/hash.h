@@ -12,13 +12,11 @@ typedef struct HashMap {
   char** keys;
 } HashMap;
 
-unsigned long Hash(char const *str);
-
-void InitializeHashMap(HashMap* map);
-int Insert(HashMap* map, char const * key, char const * value);
-int Delete(HashMap* map, char const * key);
-int Search(HashMap* map, char const *key, char const ** value);
-int Exists(HashMap* map, char const *key);
+void init_hash_map(HashMap* map);
+int insert(HashMap* map, char const * key, char const * value);
+int delete_key(HashMap* map, char const * key);
+int search(HashMap* map, char const *key, char const ** value);
+int exists(HashMap* map, char const *key);
 
 #define HASH_KEY_NOT_FOUND -1
 

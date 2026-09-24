@@ -6,11 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+Beatmap __read_beatmap(OsuFile* file);
+Collection __read_collection(OsuFile* file);
 char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLines);
 
-Beatmap* ReadBeatmaps(OsuFile* file, int* nBeatmaps)
+Beatmap* read_beatmaps(OsuFile* file, int* nBeatmaps)
 {
-  int version = ReadInt(file);
+  int version = read_int(file);
   if (version < 20260000) {
     fprintf(stderr, "Version %d not supported\n", version);
     return NULL;
@@ -18,8 +20,8 @@ Beatmap* ReadBeatmaps(OsuFile* file, int* nBeatmaps)
 
   printf("osu! db version: %d\n", version);
 
-  SkipBytes(file, 13);
-  char const * playerName = ReadString(file);
+  skip_bytes(file, 13);
+  char const * playerName = read_string(file);
   if (playerName == NULL) {
     fprintf(stderr, "Failed to read player name\n");
     return NULL;
@@ -27,60 +29,31 @@ Beatmap* ReadBeatmaps(OsuFile* file, int* nBeatmaps)
   
   printf("Player name: %s\n", playerName);
 
-  *nBeatmaps = ReadInt(file);
+  *nBeatmaps = read_int(file);
 
   printf("Reading %d beatmaps\n", *nBeatmaps);
 
   Beatmap* beatmaps = malloc(*nBeatmaps * sizeof(Beatmap));
-
-  for (int i = 0; i < *nBeatmaps; i++)
-  {
-    beatmaps[i] = ReadBeatmap(file);
-  }
+  for (int i = 0; i < *nBeatmaps; i++) beatmaps[i] = __read_beatmap(file);
 
   return beatmaps;
 }
 
-Beatmap ReadBeatmap(OsuFile* file)
+Collection* read_collections(OsuFile* file, int* nCollections)
 {
-  Beatmap beatmap;
+  read_int(file);
+  *nCollections = read_int(file);
+  Collection* collections = malloc(*nCollections * sizeof(Collection));
 
-  beatmap.artistName = ReadString(file);
-  SkipString(file);
-  beatmap.songTitle = ReadString(file);
-  SkipString(file);
-  SkipString(file);
-  SkipString(file);
-  beatmap.audioFileName = ReadString(file);
-  beatmap.mD5Hash = ReadString(file);
-  beatmap.osuFileName = ReadString(file);
-  SkipBytes(file, 39);
-  int n = ReadInt(file);
-  SkipBytes(file, n * INT_FLOAT_PAIR_SIZE);
-  n = ReadInt(file);
-  SkipBytes(file, n * INT_FLOAT_PAIR_SIZE);
-  n = ReadInt(file);
-  SkipBytes(file, n * INT_FLOAT_PAIR_SIZE);
-  n = ReadInt(file);
-  SkipBytes(file, n * INT_FLOAT_PAIR_SIZE);
-  SkipBytes(file, 12);
-  n = ReadInt(file);
-  SkipBytes(file, n * TIMING_POINT_SIZE);
-  ReadInt(file);
-  beatmap.beatmapId = ReadInt(file);
-  SkipBytes(file, 15);
-  beatmap.songSource = ReadString(file);
-  beatmap.songTags = ReadString(file);
-  ReadShort(file);
-  SkipString(file);
-  SkipBytes(file, 10);
-  beatmap.folderName = ReadString(file);
-  SkipBytes(file, 18);    
+  for (int i = 0; i < *nCollections; i++)
+  {
+    collections[i] = __read_collection(file);
+  }
 
-  return beatmap;
+  return collections;
 }
 
-char const * ExtractBackgroundFileName(char const *beatmapInformationFilePath)
+char const * extract_bg_file_name(char const *beatmapInformationFilePath)
 {
   FILE* fptr = fopen(beatmapInformationFilePath, "r");
 
@@ -131,29 +104,54 @@ char const * ExtractBackgroundFileName(char const *beatmapInformationFilePath)
   return NULL;
 }
 
-Collection* ReadCollections(OsuFile* file, int* nCollections)
+Beatmap __read_beatmap(OsuFile* file)
 {
-  ReadInt(file);
-  *nCollections = ReadInt(file);
-  Collection* collections = malloc(*nCollections * sizeof(Collection));
+  Beatmap beatmap;
 
-  for (int i = 0; i < *nCollections; i++)
-  {
-    collections[i] = ReadCollection(file);
-  }
+  beatmap.artistName = read_string(file);
+  skip_string(file);
+  beatmap.songTitle = read_string(file);
+  skip_string(file);
+  skip_string(file);
+  skip_string(file);
+  beatmap.audioFileName = read_string(file);
+  beatmap.mD5Hash = read_string(file);
+  beatmap.osuFileName = read_string(file);
+  skip_bytes(file, 39);
+  int n = read_int(file);
+  skip_bytes(file, n * INT_FLOAT_PAIR_SIZE);
+  n = read_int(file);
+  skip_bytes(file, n * INT_FLOAT_PAIR_SIZE);
+  n = read_int(file);
+  skip_bytes(file, n * INT_FLOAT_PAIR_SIZE);
+  n = read_int(file);
+  skip_bytes(file, n * INT_FLOAT_PAIR_SIZE);
+  skip_bytes(file, 12);
+  n = read_int(file);
+  skip_bytes(file, n * TIMING_POINT_SIZE);
+  read_int(file);
+  beatmap.beatmapId = read_int(file);
+  skip_bytes(file, 15);
+  beatmap.songSource = read_string(file);
+  beatmap.songTags = read_string(file);
+  read_short(file);
+  skip_string(file);
+  skip_bytes(file, 10);
+  beatmap.folderName = read_string(file);
+  skip_bytes(file, 18);    
 
-  return collections;
+  return beatmap;
 }
 
-Collection ReadCollection(OsuFile* file)
+Collection __read_collection(OsuFile* file)
 {
   Collection collection;
-  collection.name = ReadString(file);
-  collection.nBeatmapHashes = ReadInt(file);
+  collection.name = read_string(file);
+  collection.nBeatmapHashes = read_int(file);
   collection.beatmapHashes = malloc(collection.nBeatmapHashes * sizeof(char*));
   for (int i = 0; i < collection.nBeatmapHashes; i++)
   {
-    char const * hash = ReadString(file);
+    char const * hash = read_string(file);
     collection.beatmapHashes[i] = hash;
   }
 
@@ -173,7 +171,7 @@ char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLin
      
       fseek(fptr, -1, SEEK_CUR);
 
-      return (char const **)SplitIntoLines(buf, len, nLines);
+      return (char const **)split_into_lines(buf, len, nLines);
     }
   }
 

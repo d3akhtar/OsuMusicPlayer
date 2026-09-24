@@ -7,18 +7,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-void PrintBeatmap(Beatmap* beatmap);
-void PrintCollection(Collection* collection);
-void PrintSong(Song* song);
-void PrintPlaylist(Playlist* playlist);
+void print_beatmap(Beatmap* beatmap);
+void print_collection(Collection* collection);
+void print_song(Song* song);
+void print_playlist(Playlist* playlist);
 
-int TestReadingOsuDb(char const *path);
-int TestReadingOsuCollections(char const *path);
-int TestExtractSongs(Beatmap* beatmaps, int nBeatmaps);
-int TestExtractSongsFromCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps);
-int TestCreatePlaylistForSongs(Song* songs, int nSongs);
-int TestExtractBackgroundFileName(char const * path);
-int TestSplitIntoLines(char const * str);
+int test_reading_osu_db(char const *path);
+int test_reading_osu_collections(char const *path);
+int test_extract_songs(Beatmap* beatmaps, int nBeatmaps);
+int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmaps, int nBeatmaps);
+int test_create_playlist_for_songs(Song* songs, int nSongs);
+int test_extract_bg_file_name(char const * path);
+int test_split_into_lines(char const * str);
 
 int main()
 {
@@ -28,186 +28,186 @@ int main()
   char const * collectionsPath = "./tests/data/collection.db";
   char const * beatmapInfoPath = "./tests/data/testBeatmapInfoFile.osu";
 
-  if (!TestReadingOsuDb(osuDbPath)) {
+  if (!test_reading_osu_db(osuDbPath)) {
     fprintf(stderr, "TestReadingOsuDb failed\n");
     exit(-1);
   }
 
-  if (!TestReadingOsuCollections(collectionsPath)) {
+  if (!test_reading_osu_collections(collectionsPath)) {
     fprintf(stderr, "TestReadingOsuCollections failed\n");
     exit(-1);
   }
 
-  OsuFile file = OpenOsuFile(osuDbPath);
+  OsuFile file = open_osu_file(osuDbPath);
   if (file.fptr == NULL) {
     fprintf(stderr, "Failed to open file: %s\n", osuDbPath);
     exit(-1);
   }
 
   int nBeatmaps;
-  Beatmap* beatmaps = ReadBeatmaps(&file, &nBeatmaps);
+  Beatmap* beatmaps = read_beatmaps(&file, &nBeatmaps);
 
-  if (!TestExtractSongs(beatmaps, nBeatmaps)) {
+  if (!test_extract_songs(beatmaps, nBeatmaps)) {
     fprintf(stderr, "TestExtractSongs failed\n");
     exit(-1);    
   }
 
-  OsuFile collectionDb = OpenOsuFile(collectionsPath);
+  OsuFile collectionDb = open_osu_file(collectionsPath);
   if (file.fptr == NULL) {
     fprintf(stderr, "Failed to open file: %s\n", collectionsPath);
     exit(-1);
   }
 
   int nCollections;
-  Collection* collections = ReadCollections(&collectionDb, &nCollections);
+  Collection* collections = read_collections(&collectionDb, &nCollections);
 
   if (nCollections <= 0) {
     fprintf(stderr, "Failed to read any collections\n");
     exit(-1);
   }
 
-  if (!TestExtractSongsFromCollection(&collections[0], beatmaps, nBeatmaps)) {
+  if (!test_extract_songs_from_collections(&collections[0], beatmaps, nBeatmaps)) {
     fprintf(stderr, "TestExtractSongsFromCollection failed\n");
     exit(-1);    
   }
 
-  if (!TestExtractBackgroundFileName(beatmapInfoPath)) {
+  if (!test_extract_bg_file_name(beatmapInfoPath)) {
     fprintf(stderr, "TestExtractBackgroundFileName failed\n");
     exit(-1);    
   }
 
-  if (!TestSplitIntoLines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
+  if (!test_split_into_lines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
     fprintf(stderr, "TestSplitIntoLines failed\n");
     exit(-1);   
   }
 }
 
-void PrintBeatmap(Beatmap* beatmap)
+void print_beatmap(Beatmap* beatmap)
 {
   printf("[%s] %s - %s => Song location: %s/%s\n", beatmap->mD5Hash, beatmap->artistName, beatmap->songTitle, beatmap->folderName, beatmap->audioFileName);
 }
 
-void PrintCollection(Collection* collection)
+void print_collection(Collection* collection)
 {
   printf("%s - %d maps\n", collection->name, collection->nBeatmapHashes);
 }
 
-void PrintSong(Song* song)
+void print_song(Song* song)
 {
   printf("%s => %s\n", song->songInfo, song->audioFilePath);
 }
 
-void PrintPlaylist(Playlist* playlist)
+void print_playlist(Playlist* playlist)
 {
   printf("Number of songs%d\n", playlist->nSongs);
   for (int i = 0; i < playlist->nSongs; i++)
   {
     printf("\t");
-    PrintSong(&playlist->songs[i]);
+    print_song(&playlist->songs[i]);
   }
 }
 
-int TestReadingOsuDb(char const *path)
+int test_reading_osu_db(char const *path)
 {
   printf("== TestReadingOsuDb(%s) ==\n", path);
   
-  OsuFile file = OpenOsuFile(path);
+  OsuFile file = open_osu_file(path);
   if (file.fptr == NULL) {
     fprintf(stderr, "Failed to open file: %s\n", path);
     return 0;
   }
 
   int nBeatmaps;
-  Beatmap* beatmaps = ReadBeatmaps(&file, &nBeatmaps);
+  Beatmap* beatmaps = read_beatmaps(&file, &nBeatmaps);
 
   printf("Read %d beatmaps, displaying first 20\n", nBeatmaps);
 
   for (int i = 0; i < 20; i++)
   {
-    PrintBeatmap(&beatmaps[i]);
+    print_beatmap(&beatmaps[i]);
   }
 
-  CloseOsuFile(&file);
+  close_osu_file(&file);
 
   return 1;
 }
 
-int TestReadingOsuCollections(char const *path)
+int test_reading_osu_collections(char const *path)
 {
   printf("== TestReadingOsuCollections(%s) ==\n", path);
 
-  OsuFile file = OpenOsuFile(path);
+  OsuFile file = open_osu_file(path);
   if (file.fptr == NULL) {
     fprintf(stderr, "Failed to open file: %s\n", path);
     return 0;
   }
 
   int nCollections;
-  Collection* collections = ReadCollections(&file, &nCollections);
+  Collection* collections = read_collections(&file, &nCollections);
 
   printf("Read %d collections, displaying first 20\n", nCollections);
 
   for (int i = 0; i < 20; i++)
   {
-    PrintCollection(&collections[i]);
+    print_collection(&collections[i]);
   }
 
-  CloseOsuFile(&file);
+  close_osu_file(&file);
 
   return 1;  
 }
 
-int TestExtractSongs(Beatmap* beatmaps, int nBeatmaps)
+int test_extract_songs(Beatmap* beatmaps, int nBeatmaps)
 {
   printf("== TestExtractSongs ==\n");
 
   int nSongs;
-  Song* songs = ExtractSongs(beatmaps, nBeatmaps, &nSongs);
+  Song* songs = extract_songs(beatmaps, nBeatmaps, &nSongs);
 
   printf("Extracted %d songs, displaying first 20\n", nSongs);
 
   for (int i = 0; i < 20; i++)
   {
     printf("%d. ", i+1);
-    PrintSong(&songs[i]);
+    print_song(&songs[i]);
   }
 
   return 1;
 }
 
-int TestExtractSongsFromCollection(Collection* collection, Beatmap* beatmaps, int nBeatmaps)
+int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmaps, int nBeatmaps)
 {
   printf("== TestExtractSongsFromCollection ==\n");  
 
   int nSongs;
-  Song* songs = ExtractSongsForCollection(collection, beatmaps, nBeatmaps, &nSongs);
+  Song* songs = extract_songs_for_collection(collection, beatmaps, nBeatmaps, &nSongs);
 
   printf("Extracted %d songs from collection %s, displaying first 20\n", nSongs, collection->name);
 
   for (int i = 0; i < 20; i++)
   {
     printf("%d. ", i+1);
-    PrintSong(&songs[i]);
+    print_song(&songs[i]);
   }
 
   return 1;
 }
 
-int TestCreatePlaylistForSongs(Song* songs, int nSongs)
+int test_create_playlist_for_songs(Song* songs, int nSongs)
 {
   printf("== TestCreatePlaylistForSongs ==\n");
 
-  Playlist playlist = CreatePlaylistForSongs(songs, nSongs);
-  PrintPlaylist(&playlist);
+  Playlist playlist = create_playlist_for_songs(songs, nSongs);
+  print_playlist(&playlist);
 
   return 1;
 }
 
-int TestExtractBackgroundFileName(char const * path)
+int test_extract_bg_file_name(char const * path)
 {
   printf("== TestExtractBackgroundFileName(%s) ==\n", path);
 
-  char const * backgroundFileName = ExtractBackgroundFileName(path);
+  char const * backgroundFileName = extract_bg_file_name(path);
 
   if (backgroundFileName == NULL) {
     fprintf(stderr, "Failed to get background file name\n");
@@ -219,12 +219,12 @@ int TestExtractBackgroundFileName(char const * path)
   return 1;
 }
 
-int TestSplitIntoLines(char const * str)
+int test_split_into_lines(char const * str)
 {
   printf("== TestSplitIntoLines(%s) ==\n", str);
 
   int nLines;
-  char ** lines = SplitIntoLines(str, strlen(str), &nLines);
+  char ** lines = split_into_lines(str, strlen(str), &nLines);
 
   printf("Got %d lines:\n", nLines);
 

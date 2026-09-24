@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 
-void CaptureFrame(FFTData *data, float const * audioSamples)
+void capture_frame(FFTData *data, float const * audioSamples)
 {
   for (int i = 0; i < FFT_WINDOW_SIZE; i++)
   {
@@ -14,7 +14,7 @@ void CaptureFrame(FFTData *data, float const * audioSamples)
     data->workBuffer[i].imaginary = 0.0f;
   }
 
-  CooleyTukeyFFTSlow(data->workBuffer, FFT_WINDOW_SIZE);
+  cooley_tukey_fft_slow(data->workBuffer, FFT_WINDOW_SIZE);
   memcpy(data->spectrum, data->workBuffer, sizeof(FFTComplex)*FFT_WINDOW_SIZE);
 
   float smoothedSpectrum[BUFFER_SIZE];
@@ -38,7 +38,7 @@ void CaptureFrame(FFTData *data, float const * audioSamples)
   data->historyPos = (data->historyPos + 1) % data->fftHistoryLen;
 }
 
-void RenderFrame(FFTData const *data, Image *fftImage)
+void render_frame(FFTData const *data, Image *fftImage)
 {
   float framesSinceTapback = floorf((float)(data->tapbackPos));
   framesSinceTapback = Clamp(framesSinceTapback, 0.0f, (float)(data->fftHistoryLen)-1);
@@ -51,7 +51,7 @@ void RenderFrame(FFTData const *data, Image *fftImage)
     ImageDrawPixel(fftImage, bin, FFT_ROW, ColorFromNormalized((Vector4){amplitude[bin], UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL}));
 }
 
-void CooleyTukeyFFTSlow(FFTComplex *spectrum, int n)
+void cooley_tukey_fft_slow(FFTComplex *spectrum, int n)
 {
   int j = 0;
   for (int i = 1; i < n - 1; i++)

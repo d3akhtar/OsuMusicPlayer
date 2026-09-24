@@ -1,6 +1,6 @@
 #include "fft.h"
 #include "gui.h"
-#include "utils.h"
+#include "utils/format.h"
 #include <math.h>
 #include <raylib/raylib.h>
 
@@ -124,8 +124,8 @@ int main()
                 audioSamples[i] = (chunkSamples[i*2] + chunkSamples[i*2+1]) * 0.5f/32767.0f;
         }
 
-        CaptureFrame(&fftData, audioSamples);
-        RenderFrame(&fftData, &fftImage);
+        capture_frame(&fftData, audioSamples);
+        render_frame(&fftData, &fftImage);
         UpdateTexture(fftTexture, fftImage.data);
         
         ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
@@ -143,14 +143,14 @@ int main()
             GuiDrawIcon(ICON_AUDIO, 25, 630, 2, CYAN);
             GuiSliderBar((Rectangle){65, 637, 200, 15}, "", "", &volumeValue, 0.0f, 1.0f);
 
-            GuiDrawIconButton(ICON_PLAYER_PREVIOUS, 360, 630, 2, CYAN);
-            if (GuiDrawIconButton(ICON_PLAYER_PLAY, 410, 630, 2, paused ? CYAN : GREEN)) paused = false;
-            if (GuiDrawIconButton(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : CYAN)) paused = true;
-            GuiDrawIconButton(ICON_PLAYER_NEXT, 510, 630, 2, CYAN);
-            GuiDrawIconButton(ICON_REDO, 860, 630, 2, CYAN);
+            gui_draw_icon_button(ICON_PLAYER_PREVIOUS, 360, 630, 2, CYAN);
+            if (gui_draw_icon_button(ICON_PLAYER_PLAY, 410, 630, 2, paused ? CYAN : GREEN)) paused = false;
+            if (gui_draw_icon_button(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : CYAN)) paused = true;
+            gui_draw_icon_button(ICON_PLAYER_NEXT, 510, 630, 2, CYAN);
+            gui_draw_icon_button(ICON_REDO, 860, 630, 2, CYAN);
             
-            DrawText(FormatTimerProgress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);
-            if (GuiDrawMusicProgressBar(130, 675, 770, 10, &songProgress, LIGHTGRAY, (Color){22,201,201,255})) {
+            DrawText(format_timer_progress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);
+            if (gui_draw_music_progress_bar(130, 675, 770, 10, &songProgress, LIGHTGRAY, (Color){22,201,201,255})) {
                 musicProgressBarChanging = true;
                 wavCursor = songProgress * (float)wav.frameCount;
             } else musicProgressBarChanging = false;
