@@ -2,4 +2,13 @@
 
 #include "raylib/raylib.h"
 
-int gui_draw_music_progress_bar(int posX, int posY, int width, int height, float *progress, Color unfinishedColor, Color finishedColor);
+void init_music_playback();
+
+void set_song(char const *path);
+void advance_song(unsigned int advanceAmount);
+void retreat_song(unsigned int retreatAmount);
+void toggle_pause();
+
+void update_song_visuals();
+int gui_draw_music_playback();
+void unload_music_playback();
