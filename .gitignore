@@ -5,3 +5,4 @@ app
 omp
 omp_tests
 .DS_Store
+*.dSYM*
