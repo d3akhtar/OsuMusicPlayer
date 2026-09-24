@@ -1,5 +1,4 @@
 #include "fft.h"
-#include "gui.h"
 #include "ui/elements.h"
 #include "ui/music_playback.h"
 #include "utils/format.h"
@@ -12,6 +11,17 @@
 #include <tinyfiledialogs.h>
 
 static const Color CYAN = {22,255,255,255};
+
+static bool paused = false;
+static unsigned int wavCursor = 0;
+static unsigned int frameCount = 0;
+static int audioStreamTotalSeconds = 0;
+static int currentAudioStreamTimeSeconds = 0;
+static float songProgress = 0.0f;
+
+static void __handle_input();
+
+static void __set_song_progress_based_on_seconds(int newCurrentAudioStreamTimeSeconds);
 
 int main()
 {
@@ -53,14 +63,14 @@ int main()
     AudioStream audioStream = LoadAudioStream(SAMPLE_RATE, PER_SAMPLE_BIT_DEPTH, MONO);
     PlayAudioStream(audioStream);
 
-    int audioStreamTotalSeconds = wav.frameCount / SAMPLE_RATE;
-    int currentAudioStreamTimeSeconds = 0;
+    audioStreamTotalSeconds = wav.frameCount / SAMPLE_RATE;
+    currentAudioStreamTimeSeconds = 0;
 
     int fftHistoryLen = (int)ceilf(FFT_HISTORICAL_SMOOTHING_DUR/WINDOW_TIME)+1;
     FFTData fftData = {
-        .spectrum = RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
-        .workBuffer = RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
-        .prevMagnitudes = RL_CALLOC(BUFFER_SIZE, sizeof(float)),
+        .spectrum = (FFTComplex*)RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
+        .workBuffer = (FFTComplex*)RL_CALLOC(sizeof(FFTComplex), FFT_WINDOW_SIZE),
+        .prevMagnitudes = (float*)RL_CALLOC(BUFFER_SIZE, sizeof(float)),
         .fftHistory = RL_CALLOC(fftHistoryLen, sizeof(float[BUFFER_SIZE])),
         .fftHistoryLen = fftHistoryLen,
         .historyPos = 0,
@@ -68,15 +78,12 @@ int main()
         .tapbackPos = 0.01f
     };
 
-    unsigned int wavCursor = 0;
-    short const *wavPCM16 = wav.data;
+    short const *wavPCM16 = (short*)wav.data;
 
     short chunkSamples[AUDIO_STREAM_RING_BUFFER_SIZE] = {0};
     float audioSamples[FFT_WINDOW_SIZE] = {0};
 
     float volumeValue = 1.0f;
-    
-    float songProgress = 0.0f;
 
     int currentPlaylistScrollIndex = 0, currentPlaylistActive = 1;
 
@@ -94,15 +101,18 @@ int main()
     char const * osuPath = "{SELECT OSU! PATH}";
     char const * errorMessage = "";
     bool showSelectOsuPathDialog = false;
-
-    bool paused = false;
+    
     bool musicProgressBarChanging = false;
 
     Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
 
+    frameCount = wav.frameCount;
+
     while (!WindowShouldClose())
     {
-        songProgress = (float)wavCursor / (float)wav.frameCount;
+        __handle_input();
+        
+        songProgress = (float)wavCursor / (float)frameCount;
         currentAudioStreamTimeSeconds = audioStreamTotalSeconds*songProgress;
         
         SetAudioStreamVolume(audioStream, volumeValue);
@@ -253,4 +263,22 @@ int main()
 
     CloseWindow();
     return 0;
+}
+
+static void __set_song_progress_based_on_seconds(int newCurrentAudioStreamTimeSeconds)
+{
+    currentAudioStreamTimeSeconds = newCurrentAudioStreamTimeSeconds;
+    songProgress = (float)currentAudioStreamTimeSeconds / (float)audioStreamTotalSeconds;
+    wavCursor = frameCount * songProgress;    
+}
+
+static void __handle_input()
+{
+    if (IsKeyPressed(KEY_SPACE)) paused = !paused;
+
+    if (IsKeyPressed(KEY_LEFT)) 
+        __set_song_progress_based_on_seconds((int)fmax(currentAudioStreamTimeSeconds-5, 0));
+
+    if (IsKeyPressed(KEY_RIGHT)) 
+        __set_song_progress_based_on_seconds((int)fmin(currentAudioStreamTimeSeconds+5, audioStreamTotalSeconds-1));
 }
