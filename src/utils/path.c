@@ -24,5 +24,8 @@ char* join_paths(char const* a, char const* b)
   res[aLen] = DIR_SEP;
   memcpy(&res[aLen+1], b, bLen);
 
+  for (int i = 0; i < totalLen; i++)
+    if (res[i] == '\\' || res[i] == '/') res[i] = DIR_SEP; // Ensure all slashes are represented properly according to their OS
+
   return res;
 }

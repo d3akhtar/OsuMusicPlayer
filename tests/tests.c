@@ -46,6 +46,17 @@ int main()
     fprintf(stderr, "test_join_paths failed\n");
     exit(-1);   
   }
+
+
+  if (!test_join_paths("directory\\innerDir", "path.txt")) {
+    fprintf(stderr, "test_join_paths failed\n");
+    exit(-1);   
+  }
+
+  if (!test_join_paths("directory\\innerDir\\", "path.txt")) {
+    fprintf(stderr, "test_join_paths failed\n");
+    exit(-1);   
+  }
   
   char const * osuDbPath = "./tests/data/osu!.db";
   char const * collectionsPath = "./tests/data/collection.db";
