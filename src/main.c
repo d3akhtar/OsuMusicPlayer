@@ -1,6 +1,7 @@
 #include "fft.h"
 #include "ui/elements.h"
 #include "ui/music_playback.h"
+#include "ui/song_info.h"
 #include "ui/styles.h"
 #include <math.h>
 #include <raylib/raylib.h>
@@ -20,6 +21,7 @@ int main()
     SetTargetFPS(60);
 
     init_default_styles();
+    init_song_info();
 
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(AUDIO_STREAM_RING_BUFFER_SIZE);
@@ -59,10 +61,7 @@ int main()
         BeginDrawing();
             gui_draw_music_playback();
 
-            DrawRectangle(915, 5, 360, 360, BLACK);
-            DrawTextureRec(placeholderTexture, (Rectangle){placeholderTexture.width/4.0f,placeholderTexture.height/4.0f,350,350}, (Vector2){920,10}, WHITE);
-            DrawText("Song: PARTY In PSPACE", 920, 370, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-            DrawText("Artist: tnshi", 920, 390, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+            gui_draw_song_info();
 
             DrawText("Playlist: tnshi songs", 920, 420, 20, GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
             GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
