@@ -4,8 +4,7 @@
 #include <string.h>
 
 static unsigned long __hash(char const *str);
-static Node* __new_node(char const * key, char const * value);
-static void __print_keys(HashMap *map);
+static Node* __new_node(char const * key, void const * value, size_t len);
 static Node* __find_node_with_key(HashMap *map, char const *key);
 
 void init_hash_map(HashMap* map)
@@ -16,18 +15,18 @@ void init_hash_map(HashMap* map)
   map->keys = (char**)malloc(map->capacity * sizeof(char*));
 }
 
-int insert(HashMap* map, char const * key, char const * value)
+int insert(HashMap* map, char const * key, void const * value, size_t len)
 {
   int idx = __hash(key) % map->capacity;
 
-  Node* node = __new_node(key, value);
+  Node* node = __new_node(key, value, len);
   if (map->elems[idx] == NULL) map->elems[idx] = node;
   else {
     node->next = map->elems[idx];
     map->elems[idx] = node;
   }
 
-  map->keys[map->nElems] = malloc(strlen(key) + 1);
+  map->keys[map->nElems] = (char*)malloc(strlen(key) + 1);
   strcpy(map->keys[map->nElems++], key);
 
   return HASH_KEY_INSERTED;
@@ -63,12 +62,12 @@ int remove_key(HashMap* map, char const * key)
   return HASH_KEY_NOT_FOUND;
 }
 
-int search(HashMap* map, char const *key, char const ** value)
+int search(HashMap* map, char const *key, void ** value, size_t *len)
 {
-  int idx = __hash(key) % map->capacity;
   Node *n = __find_node_with_key(map, key);
   if (n == NULL) return HASH_KEY_NOT_FOUND;
   else {
+    *len = n->len;
     *value = n->value;
     return HASH_KEY_FOUND;
   }
@@ -91,24 +90,17 @@ static unsigned long __hash(char const *str)
   return hash;  
 }
 
-static Node* __new_node(char const * key, char const * value)
+static Node* __new_node(char const * key, void const * value, size_t len)
 {
-  Node* res = malloc(sizeof(Node));
-  res->key = malloc(strlen(key) + 1);
-  res->value = malloc(strlen(value) + 1);
+  Node* res = (Node*)malloc(sizeof(Node));
+  res->key = (char*)malloc(strlen(key) + 1);
+  res->value = malloc(len);
+  res->len = len;
   strcpy(res->key, key);
-  strcpy(res->value, value);
+  memcpy(res->value, value, len);
   res->next = NULL;
 
   return res;
-}
-
-static void __print_keys(HashMap *map)
-{
-  for (int i = 0; i < map->nElems; i++)
-  {
-    printf("key: %s\n", map->keys[i]);
-  }
 }
 
 static Node* __find_node_with_key(HashMap *map, char const *key)

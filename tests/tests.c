@@ -94,7 +94,7 @@ void print_collection(Collection* collection)
 
 void print_song(Song* song)
 {
-  printf("%s => %s\n", song->songInfo, song->audioFilePath);
+  printf("%s - %s (%s)\n", song->artistName, song->songTitle, song->audioFilePath);
 }
 
 void print_playlist(Playlist* playlist)

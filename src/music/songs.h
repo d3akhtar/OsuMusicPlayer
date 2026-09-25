@@ -3,7 +3,8 @@
 #include "osu/osu_file_reading.h"
 
 typedef struct Song {
-  char const * songInfo;
+  char const * artistName;
+  char const * songTitle;
   char const * audioFilePath;
 } Song;
 

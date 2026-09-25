@@ -3,7 +3,10 @@
 #include <string.h>
 
 int compare(const void *a, const void *b) {
-    return strcmp(((Song*)a)->songInfo, (((Song*)b)->songInfo));
+    int artistComp = strcmp(((Song*)a)->artistName, (((Song*)b)->artistName));
+    return artistComp == 0
+      ? artistComp
+      : strcmp(((Song*)a)->songTitle, (((Song*)b)->songTitle));
 }
 
 Playlist create_playlist_for_songs(Song* songs, int nSongs)

@@ -16,10 +16,10 @@ Song* extract_songs(Beatmap* beatmaps, int nBeatmaps, int *nSongs)
   {
     char const * audioFilePath = TextFormat("%s/%s", beatmaps[i].folderName, beatmaps[i].audioFileName);
 
-    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
-      char const * songInfo = TextFormat("%s - %s", beatmaps[i].artistName, beatmaps[i].songTitle);
-      insert(&seenSongPaths, audioFilePath, songInfo);
-    }
+    Beatmap *b = &beatmaps[i];
+
+    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND)
+      insert(&seenSongPaths, audioFilePath, &b, sizeof(Beatmap*));
   }
 
   Song* songs = __extract_songs_from_seen_song_paths(&seenSongPaths);
@@ -36,7 +36,7 @@ Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, in
   for (int i = 0; i < collection->nBeatmapHashes; i++)
   {
     if (exists(&beatmapHashes, collection->beatmapHashes[i]) == HASH_KEY_NOT_FOUND)
-      insert(&beatmapHashes, collection->beatmapHashes[i], "");
+      insert(&beatmapHashes, collection->beatmapHashes[i], "", 0);
   }
     
   HashMap seenSongPaths;
@@ -48,10 +48,8 @@ Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, in
     
     char const * audioFilePath = TextFormat("%s/%s", beatmaps[i].folderName, beatmaps[i].audioFileName);
 
-    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND) {
-      char const * songInfo = TextFormat("%s - %s", beatmaps[i].artistName, beatmaps[i].songTitle);
-      insert(&seenSongPaths, audioFilePath, songInfo);
-    }
+    if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND)
+      insert(&seenSongPaths, audioFilePath, &beatmaps[i], sizeof(Beatmap*));
   }
 
   Song* songs = __extract_songs_from_seen_song_paths(&seenSongPaths);
@@ -64,20 +62,28 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
 { 
   printf("Number of songs: %d\n", seenSongPaths->nElems);
 
-  Song* songs = malloc(sizeof(Song) * seenSongPaths->nElems);
+  Song* songs = (Song*)malloc(sizeof(Song) * seenSongPaths->nElems);
 
   for (int i = 0; i < seenSongPaths->nElems; i++)
   {
     char const * audioFilePath = seenSongPaths->keys[i];
-    char const * songInfo;
+    Beatmap * beatmap;
+    Beatmap ** b = &beatmap;
+    size_t len;
    
-    if (search(seenSongPaths, audioFilePath, &songInfo) == HASH_KEY_NOT_FOUND)
+    if (search(seenSongPaths, audioFilePath, ((void **)&b), &len) == HASH_KEY_NOT_FOUND) {
       fprintf(stderr, "Key: %s not found\n", audioFilePath);
+      continue;
+    }
 
-    songs[i].songInfo = malloc(strlen(songInfo) + 1);
-    songs[i].audioFilePath = malloc(strlen(audioFilePath) + 1);
+    beatmap = *b;
+
+    songs[i].artistName = (char*)malloc(strlen(beatmap->artistName) + 1);
+    songs[i].songTitle = (char*)malloc(strlen(beatmap->songTitle) + 1);
+    songs[i].audioFilePath = (char*)malloc(strlen(audioFilePath) + 1);
  
-    strcpy((char*)songs[i].songInfo, songInfo);
+    strcpy((char*)songs[i].artistName, beatmap->artistName);
+    strcpy((char*)songs[i].songTitle, beatmap->songTitle);
     strcpy((char*)songs[i].audioFilePath, audioFilePath);
   }
 
