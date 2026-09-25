@@ -1,6 +1,7 @@
 #include "music/playlist.h"
 #include "music/songs.h"
 #include "osu/osu_db.h"
+#include "utils/path.h"
 #include "utils/string.h"
 #include <osu/osu_file_reading.h>
 #include <stdio.h>
@@ -12,18 +13,39 @@ void print_collection(Collection* collection);
 void print_song(Song* song);
 void print_playlist(Playlist* playlist);
 
+int test_split_into_lines(char const * str);
+int test_join_paths(char const* a, char const* b);
 int test_reading_osu_db(char const *path);
 int test_reading_osu_collections(char const *path);
 int test_extract_songs(Beatmap* beatmaps, int nBeatmaps);
 int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmaps, int nBeatmaps);
 int test_create_playlist_for_songs(Song* songs, int nSongs);
 int test_extract_bg_file_name(char const * path);
-int test_split_into_lines(char const * str);
 int test_create_list_view_text_for_playlist(Playlist* playlist);
 
 int main()
 {
   printf("Starting tests...\n");
+
+  if (!test_split_into_lines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
+    fprintf(stderr, "test_split_into_lines failed\n");
+    exit(-1);   
+  }
+
+  if (!test_join_paths("directory", "path.txt")) {
+    fprintf(stderr, "test_join_paths failed\n");
+    exit(-1);   
+  }
+
+  if (!test_join_paths("directory/innerDir", "path.txt")) {
+    fprintf(stderr, "test_join_paths failed\n");
+    exit(-1);   
+  }
+
+  if (!test_join_paths("directory/innerDir/", "path.txt")) {
+    fprintf(stderr, "test_join_paths failed\n");
+    exit(-1);   
+  }
   
   char const * osuDbPath = "./tests/data/osu!.db";
   char const * collectionsPath = "./tests/data/collection.db";
@@ -85,11 +107,6 @@ int main()
     exit(-1);    
   }
 
-  if (!test_split_into_lines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
-    fprintf(stderr, "test_split_into_lines failed\n");
-    exit(-1);   
-  }
-
   Playlist playlist = create_playlist_for_songs(songs, nSongs, collections[0].name);
   if (!test_create_list_view_text_for_playlist(&playlist)) {
     fprintf(stderr, "test_create_list_view_text_for_playlist failed\n");
@@ -120,6 +137,34 @@ void print_playlist(Playlist* playlist)
     printf("\t");
     print_song(&playlist->songs[i]);
   }
+}
+
+int test_split_into_lines(char const * str)
+{
+  printf("== test_split_into_lines(%s) ==\n", str);
+
+  int nLines;
+  char ** lines = split_into_lines(str, strlen(str), &nLines);
+
+  printf("Got %d lines:\n", nLines);
+
+  for (int i = 0; i < nLines; i++)
+  {
+    printf("(%d): %s\n", i+1, lines[i]);
+  }
+
+  return 1;
+}
+
+int test_join_paths(char const* a, char const* b)
+{
+  printf("== test_join_paths(%s, %s) ==\n", a, b);
+
+  char *joined = join_paths(a, b);
+
+  printf("Joined path: %s\n", joined);
+
+  return 1;
 }
 
 int test_reading_osu_db(char const *path)
@@ -230,23 +275,6 @@ int test_extract_bg_file_name(char const * path)
   }
 
   printf("Retrieved background file name: %s\n", backgroundFileName);
-
-  return 1;
-}
-
-int test_split_into_lines(char const * str)
-{
-  printf("== test_split_into_lines(%s) ==\n", str);
-
-  int nLines;
-  char ** lines = split_into_lines(str, strlen(str), &nLines);
-
-  printf("Got %d lines:\n", nLines);
-
-  for (int i = 0; i < nLines; i++)
-  {
-    printf("(%d): %s\n", i+1, lines[i]);
-  }
 
   return 1;
 }
