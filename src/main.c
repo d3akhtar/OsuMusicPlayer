@@ -1,6 +1,7 @@
 #include "fft.h"
 #include "ui/elements.h"
 #include "ui/music_playback.h"
+#include "ui/osu_path_dialog.h"
 #include "ui/song_info.h"
 #include "ui/styles.h"
 #include <math.h>
@@ -21,6 +22,7 @@ int main()
     SetTargetFPS(60);
 
     init_default_styles();
+    init_osu_path();
     init_song_info();
 
     InitAudioDevice();
@@ -41,13 +43,8 @@ int main()
 
     int songListIndex = 0;
     int songListActive = 0;
-
-    char const * osuPath = "{SELECT OSU! PATH}";
-    char const * errorMessage = "";
-    bool showSelectOsuPathDialog = false;
-    
-    Texture2D placeholderTexture = LoadTexture("./resources/pspace.PNG");
-
+    int songListActive = 0;
+        
     while (!WindowShouldClose())
     {
         mousePos = GetMousePosition();
@@ -118,23 +115,7 @@ int main()
                 GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 0);
             }
 
-            if (showSelectOsuPathDialog) {
-                GuiPanel((Rectangle) {140, 230, 1000, 200}, "Select osu! Path");
-                DrawText(errorMessage, 540, 263, 18, RED);
-                DrawText("Path:", 180, 290, 60, BLACK);
-                DrawRectangleLines(350, 290, 650, 60, BLACK);
-                DrawText(osuPath, 360, 310, 20, (Color){133, 90, 129, 255});
-
-                if (GuiButton((Rectangle) {1010, 290, 90, 60}, "Browse")) {
-                    osuPath = tinyfd_selectFolderDialog("Select osu! location", "");
-                }
-
-                GuiSetState(strlen(errorMessage) == 0 ? STATE_NORMAL : STATE_DISABLED);
-                if (GuiButton((Rectangle){150, 370, 980, 50}, "Confirm")) {
-                    showSelectOsuPathDialog = false;
-                }
-                GuiSetState(STATE_NORMAL);
-            }
+            gui_draw_osu_path_dialog();
             
         EndDrawing();
     }
