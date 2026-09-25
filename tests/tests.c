@@ -19,6 +19,7 @@ int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmap
 int test_create_playlist_for_songs(Song* songs, int nSongs);
 int test_extract_bg_file_name(char const * path);
 int test_split_into_lines(char const * str);
+int test_create_list_view_text_for_playlist(Playlist* playlist);
 
 int main()
 {
@@ -29,12 +30,12 @@ int main()
   char const * beatmapInfoPath = "./tests/data/testBeatmapInfoFile.osu";
 
   if (!test_reading_osu_db(osuDbPath)) {
-    fprintf(stderr, "TestReadingOsuDb failed\n");
+    fprintf(stderr, "test_reading_osu_db failed\n");
     exit(-1);
   }
 
   if (!test_reading_osu_collections(collectionsPath)) {
-    fprintf(stderr, "TestReadingOsuCollections failed\n");
+    fprintf(stderr, "test_reading_osu_collections failed\n");
     exit(-1);
   }
 
@@ -48,7 +49,7 @@ int main()
   Beatmap* beatmaps = read_beatmaps(&file, &nBeatmaps);
 
   if (!test_extract_songs(beatmaps, nBeatmaps)) {
-    fprintf(stderr, "TestExtractSongs failed\n");
+    fprintf(stderr, "test_extract_songs failed\n");
     exit(-1);    
   }
 
@@ -67,18 +68,26 @@ int main()
   }
 
   if (!test_extract_songs_from_collections(&collections[0], beatmaps, nBeatmaps)) {
-    fprintf(stderr, "TestExtractSongsFromCollection failed\n");
+    fprintf(stderr, "test_extract_songs_from_collection failed\n");
     exit(-1);    
   }
 
   if (!test_extract_bg_file_name(beatmapInfoPath)) {
-    fprintf(stderr, "TestExtractBackgroundFileName failed\n");
+    fprintf(stderr, "test_extract_background_file_name failed\n");
     exit(-1);    
   }
 
   if (!test_split_into_lines("abc\ndef\nhij\nabc\ndeffefef\niejroiwjrw")) {
-    fprintf(stderr, "TestSplitIntoLines failed\n");
+    fprintf(stderr, "test_split_into_lines failed\n");
     exit(-1);   
+  }
+
+  int nSongs;
+  Song *songs = extract_songs_for_collection(collections, beatmaps, nBeatmaps, &nSongs);
+  Playlist playlist = create_playlist_for_songs(songs, nSongs);
+  if (!test_create_list_view_text_for_playlist(&playlist)) {
+    fprintf(stderr, "test_create_list_view_text_for_playlist failed\n");
+    exit(-1);    
   }
 }
 
@@ -109,7 +118,7 @@ void print_playlist(Playlist* playlist)
 
 int test_reading_osu_db(char const *path)
 {
-  printf("== TestReadingOsuDb(%s) ==\n", path);
+  printf("== test_reading_osu_db(%s) ==\n", path);
   
   OsuFile file = open_osu_file(path);
   if (file.fptr == NULL) {
@@ -134,7 +143,7 @@ int test_reading_osu_db(char const *path)
 
 int test_reading_osu_collections(char const *path)
 {
-  printf("== TestReadingOsuCollections(%s) ==\n", path);
+  printf("== test_reading_osu_collections(%s) ==\n", path);
 
   OsuFile file = open_osu_file(path);
   if (file.fptr == NULL) {
@@ -159,7 +168,7 @@ int test_reading_osu_collections(char const *path)
 
 int test_extract_songs(Beatmap* beatmaps, int nBeatmaps)
 {
-  printf("== TestExtractSongs ==\n");
+  printf("== test_extract_songs ==\n");
 
   int nSongs;
   Song* songs = extract_songs(beatmaps, nBeatmaps, &nSongs);
@@ -177,7 +186,7 @@ int test_extract_songs(Beatmap* beatmaps, int nBeatmaps)
 
 int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmaps, int nBeatmaps)
 {
-  printf("== TestExtractSongsFromCollection ==\n");  
+  printf("== test_extract_songs_from_collection ==\n");  
 
   int nSongs;
   Song* songs = extract_songs_for_collection(collection, beatmaps, nBeatmaps, &nSongs);
@@ -195,7 +204,7 @@ int test_extract_songs_from_collections(Collection* collection, Beatmap* beatmap
 
 int test_create_playlist_for_songs(Song* songs, int nSongs)
 {
-  printf("== TestCreatePlaylistForSongs ==\n");
+  printf("== test_create_playlist_for_songs ==\n");
 
   Playlist playlist = create_playlist_for_songs(songs, nSongs);
   print_playlist(&playlist);
@@ -205,7 +214,7 @@ int test_create_playlist_for_songs(Song* songs, int nSongs)
 
 int test_extract_bg_file_name(char const * path)
 {
-  printf("== TestExtractBackgroundFileName(%s) ==\n", path);
+  printf("== test_extract_background_file_name(%s) ==\n", path);
 
   char const * backgroundFileName = extract_bg_file_name(path);
 
@@ -221,7 +230,7 @@ int test_extract_bg_file_name(char const * path)
 
 int test_split_into_lines(char const * str)
 {
-  printf("== TestSplitIntoLines(%s) ==\n", str);
+  printf("== test_split_into_lines(%s) ==\n", str);
 
   int nLines;
   char ** lines = split_into_lines(str, strlen(str), &nLines);
@@ -232,6 +241,19 @@ int test_split_into_lines(char const * str)
   {
     printf("(%d): %s\n", i+1, lines[i]);
   }
+
+  return 1;
+}
+
+int test_create_list_view_text_for_playlist(Playlist* playlist)
+{  
+  printf("== test_create_list_view_text_for_playlist ==\n");
+
+  char const * listViewText = create_list_view_text_for_playlist(playlist);
+
+  printf("List view text: %s\n", listViewText);
+
+  free((char*)listViewText);
 
   return 1;
 }

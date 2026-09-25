@@ -45,11 +45,13 @@ Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, in
   for (int i = 0; i < nBeatmaps; i++)
   {
     if (exists(&beatmapHashes, beatmaps[i].mD5Hash) == HASH_KEY_NOT_FOUND) continue;
+
+    Beatmap *b = &beatmaps[i];
     
     char const * audioFilePath = TextFormat("%s/%s", beatmaps[i].folderName, beatmaps[i].audioFileName);
 
     if (exists(&seenSongPaths, audioFilePath) == HASH_KEY_NOT_FOUND)
-      insert(&seenSongPaths, audioFilePath, &beatmaps[i], sizeof(Beatmap*));
+      insert(&seenSongPaths, audioFilePath, &b, sizeof(Beatmap*));
   }
 
   Song* songs = __extract_songs_from_seen_song_paths(&seenSongPaths);
