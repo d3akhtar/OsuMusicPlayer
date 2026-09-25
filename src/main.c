@@ -43,7 +43,6 @@ int main()
 
     int songListIndex = 0;
     int songListActive = 0;
-    int songListActive = 0;
         
     while (!WindowShouldClose())
     {

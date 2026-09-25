@@ -72,6 +72,14 @@ int main()
     exit(-1);    
   }
 
+  int nSongs;
+  Song *songs = extract_songs_for_collection(collections, beatmaps, nBeatmaps, &nSongs);
+
+  if (!test_create_playlist_for_songs(songs, nSongs)) {
+    fprintf(stderr, "test_create_playlist_for_songs failed\n");
+    exit(-1);    
+  }
+
   if (!test_extract_bg_file_name(beatmapInfoPath)) {
     fprintf(stderr, "test_extract_background_file_name failed\n");
     exit(-1);    
@@ -82,9 +90,7 @@ int main()
     exit(-1);   
   }
 
-  int nSongs;
-  Song *songs = extract_songs_for_collection(collections, beatmaps, nBeatmaps, &nSongs);
-  Playlist playlist = create_playlist_for_songs(songs, nSongs);
+  Playlist playlist = create_playlist_for_songs(songs, nSongs, collections[0].name);
   if (!test_create_list_view_text_for_playlist(&playlist)) {
     fprintf(stderr, "test_create_list_view_text_for_playlist failed\n");
     exit(-1);    
@@ -108,7 +114,7 @@ void print_song(Song* song)
 
 void print_playlist(Playlist* playlist)
 {
-  printf("Number of songs%d\n", playlist->nSongs);
+  printf("Name: %s, #songs: %d\n", playlist->name, playlist->nSongs);
   for (int i = 0; i < playlist->nSongs; i++)
   {
     printf("\t");
@@ -206,7 +212,7 @@ int test_create_playlist_for_songs(Song* songs, int nSongs)
 {
   printf("== test_create_playlist_for_songs ==\n");
 
-  Playlist playlist = create_playlist_for_songs(songs, nSongs);
+  Playlist playlist = create_playlist_for_songs(songs, nSongs, "Playlist name");
   print_playlist(&playlist);
 
   return 1;
