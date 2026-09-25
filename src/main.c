@@ -22,7 +22,7 @@ int main()
     SetTargetFPS(60);
 
     init_default_styles();
-    init_osu_path();
+    init_osu_path_dialog();
     init_song_info();
 
     InitAudioDevice();

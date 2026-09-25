@@ -1,6 +1,9 @@
 #include "music/songs.h"
+#include "config/osu_path.h"
 #include "core/hash.h"
+#include "osu/osu_db.h"
 #include "raylib/raylib.h"
+#include "utils/path.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,7 +65,10 @@ Song* extract_songs_for_collection(Collection* collection, Beatmap* beatmaps, in
 
 Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
 { 
-  printf("Number of songs: %d\n", seenSongPaths->nElems);
+  char const *osuPath = get_osu_path();
+  char const *songsPath = osuPath == NULL
+    ? NULL
+    : join_paths(osuPath, "Songs");
 
   Song* songs = (Song*)malloc(sizeof(Song) * seenSongPaths->nElems);
 
@@ -87,7 +93,28 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
     strcpy((char*)songs[i].artistName, beatmap->artistName);
     strcpy((char*)songs[i].songTitle, beatmap->songTitle);
     strcpy((char*)songs[i].audioFilePath, audioFilePath);
+
+    if (osuPath == NULL) continue;
+
+    char const * beatmapFolderPath = join_paths(songsPath, beatmap->folderName);
+    char const * beatmapInformationFilePath = join_paths(beatmapFolderPath, beatmap->osuFileName);
+    char const * bgFileName = extract_bg_file_name(beatmapInformationFilePath);
+    if (bgFileName == NULL) {
+      free((char*)beatmapFolderPath);
+      free((char*)beatmapInformationFilePath);
+      continue;
+    }
+
+    char const *bgFilePath = join_paths(beatmapFolderPath, bgFileName);
+    songs[i].bgFilePath = (char*)malloc(strlen(bgFilePath) + 1);
+    strcpy((char*)songs[i].bgFilePath, bgFilePath);
+
+    free((char*)beatmapFolderPath);
+    free((char*)beatmapInformationFilePath);
+    free((char*)bgFilePath);
   }
+
+  free((char*)songsPath);
 
   return songs;
 }
