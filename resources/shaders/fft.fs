@@ -8,7 +8,8 @@ out vec4 finalColor;
 uniform vec2 iResolution;
 uniform sampler2D iChannel0;
 
-const vec4 BARS = vec4(1.0, 0.0, 1.0, 1.0);
+uniform vec4 BARS;
+
 const vec4 BG = vec4(0.0, 0.0, 0.0, 1.0);
 const float FFT_ROW = 0.0;
 const float N_BINS = 512.0;

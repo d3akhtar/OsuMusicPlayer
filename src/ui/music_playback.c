@@ -8,6 +8,7 @@
 #include "ui/elements.h"
 #include "ui/song_info.h"
 #include "ui/styles.h"
+#include "utils/color.h"
 #include "utils/format.h"
 #include <stdlib.h>
 
@@ -16,6 +17,8 @@ static bool loopSong = false;
 static int __gui_draw_music_progress_bar(int posX, int posY, int width, int height, float *progress, Color unfinishedColor, Color finishedColor);
 
 static void __set_song_progress_based_on_seconds(int newCurrentAudioStreamTimeSeconds);
+
+static int barsColorLoc;
 
 static Image fftImage;
 static Shader fftShader;
@@ -52,6 +55,7 @@ void init_music_playback()
   fftShader = LoadShader(0, "./resources/shaders/fft.fs");
   int iResolutionLoc = GetShaderLocation(fftShader, "iResolution");
   iChannel0Loc = GetShaderLocation(fftShader, "iChannel0");
+  barsColorLoc = GetShaderLocation(fftShader, "BARS");
   SetShaderValue(fftShader, iResolutionLoc, &iResolution, SHADER_UNIFORM_VEC2);
   SetShaderValueTexture(fftShader, iChannel0Loc, fftTexture);
 
@@ -99,6 +103,22 @@ void retreat_song(unsigned int retreatAmount)
 void toggle_pause()
 {
   paused = !paused;
+}
+
+void set_visualizer_bar_color(Color color)
+{
+  double luminance = calculate_color_perceived_luminance(color);
+  if (luminance <= 0.1) 
+    color = ColorBrightness(color, 0.4f);    
+
+  Vector4 value = {
+    .x = color.r / 255.0f,
+    .y = color.g / 255.0f,
+    .z = color.b / 255.0f,
+    .w = color.a / 255.0f
+  };
+
+  SetShaderValue(fftShader, barsColorLoc, &value, SHADER_UNIFORM_VEC4);  
 }
 
 void update_song_visuals()

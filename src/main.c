@@ -28,14 +28,14 @@ int main()
     init_osu_path_dialog();
     load_playlists();
 
-    init_song_info();
-
     init_playlist_song_list();
 
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(AUDIO_STREAM_RING_BUFFER_SIZE);
 
     init_music_playback();
+    init_song_info();
+
     set_song(current_playlist()->songs[current_playlist()->currentSong].audioFilePath);
 
     int currentPlaylistScrollIndex = 0, currentPlaylistActive = 1;
