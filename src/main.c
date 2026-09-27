@@ -141,5 +141,4 @@ static void __handle_input()
     if (IsKeyPressed(KEY_SPACE)) toggle_pause();
     if (IsKeyPressed(KEY_LEFT)) retreat_song(5);
     if (IsKeyPressed(KEY_RIGHT)) advance_song(5);
-    if (IsKeyPressed(KEY_LEFT_ALT)) set_song("./resources/music/testSong2.mp3");
 }

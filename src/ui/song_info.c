@@ -1,5 +1,6 @@
 #include  "song_info.h"
 #include "music/current_playlist.h"
+#include "music/playlist.h"
 #include "raylib/raylib.h"
 #include "raylib/raygui.h"
 
@@ -8,13 +9,15 @@ static Song* currentSong = NULL;
 
 void init_song_info()
 {
-  set_song_info_song(&current_playlist()->songs[current_playlist()->currentSong]);
+  set_song_info_song(playlist_current_song(current_playlist()));
+  songIconTexture = LoadTexture(currentSong->bgFilePath);
 }
 
 void set_song_info_song(Song* song)
 {
   currentSong = song;
-  songIconTexture = LoadTexture(currentSong->bgFilePath);  
+  UnloadTexture(songIconTexture);
+  songIconTexture = LoadTexture(currentSong->bgFilePath);
 }
 
 void gui_draw_song_info()
