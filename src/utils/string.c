@@ -13,7 +13,7 @@ char ** split_into_lines(char const * str, size_t len, int* nLines)
   int resP = 0, lineLen = 0;
   for (int i = 0; i < len; i++)
   {
-    char line[1 << 8];
+    char line[65536];
     if (str[i] == '\n' || i == len-1) {
       line[lineLen++] = '\0';
       res[resP] = (char*)malloc(lineLen);
