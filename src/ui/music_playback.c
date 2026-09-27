@@ -11,6 +11,8 @@
 #include "utils/format.h"
 #include <stdlib.h>
 
+static bool loopSong = false;
+
 static int __gui_draw_music_progress_bar(int posX, int posY, int width, int height, float *progress, Color unfinishedColor, Color finishedColor);
 
 static void __set_song_progress_based_on_seconds(int newCurrentAudioStreamTimeSeconds);
@@ -115,10 +117,12 @@ void update_song_visuals()
             chunkSamples[i] = (short)((left + right) / 2);
 
             if (++wavCursor >= wav.frameCount) {
-              current_playlist()->currentSong++;
-              if (current_playlist()->currentSong >= current_playlist()->nSongs) current_playlist()->currentSong = 0;
-              set_song(playlist_current_song(current_playlist())->audioFilePath);
-              set_song_info_song(playlist_current_song(current_playlist()));
+              if (!loopSong) {
+                current_playlist()->currentSong++;
+                if (current_playlist()->currentSong >= current_playlist()->nSongs) current_playlist()->currentSong = 0;
+                set_song(playlist_current_song(current_playlist())->audioFilePath);
+                set_song_info_song(playlist_current_song(current_playlist()));                
+              } else wavCursor = 0;
             }
         }
 
@@ -163,7 +167,8 @@ int gui_draw_music_playback()
       set_song(playlist_current_song(current_playlist())->audioFilePath);
       set_song_info_song(playlist_current_song(current_playlist()));
     }
-    gui_draw_icon_button(ICON_REDO, 860, 630, 2, CYAN);
+
+    if (gui_draw_icon_button(ICON_REDO, 860, 630, 2, loopSong ? GREEN : CYAN)) loopSong = !loopSong;
     
     DrawText(format_timer_progress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);
     if (__gui_draw_music_progress_bar(130, 675, 770, 10, &songProgress, LIGHTGRAY, (Color){22,201,201,255})) {
