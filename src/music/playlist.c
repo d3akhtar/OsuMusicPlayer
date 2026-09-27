@@ -2,25 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 
-int compare(const void *a, const void *b) {
-    int artistComp = strcmp(((Song*)a)->artistName, (((Song*)b)->artistName));
-    return artistComp == 0
-      ? strcmp(((Song*)a)->songTitle, (((Song*)b)->songTitle))
-      : artistComp;
-}
-
-Playlist create_playlist_for_songs(Song* songs, int nSongs, char const *name)
+Playlist* create_playlist_for_songs(Song* songs, int nSongs, char const *name)
 {
-  qsort(songs, nSongs, sizeof(Song), compare);
+  Playlist *playlist = (Playlist*)malloc(sizeof(Playlist));
+  playlist->currentSong = 0;
+  playlist->nSongs = nSongs;
+  playlist->songs = songs;
 
-  Playlist playlist = {
-    .currentSong = 0,
-    .nSongs = nSongs,
-    .songs = songs
-  };
-
-  playlist.name = (char*)malloc(strlen(name));
-  strcpy(playlist.name, name);
+  playlist->name = (char*)malloc(strlen(name));
+  strcpy(playlist->name, name);
 
   return playlist;
+}
+
+Song* playlist_current_song(Playlist *playlist)
+{
+  return &playlist->songs[playlist->currentSong];
+}
+
+void free_playlist(Playlist *playlist)
+{
+  free(playlist->name);
+  for (int i = 0; i < playlist->nSongs; i++)
+  {
+    Song *s = &(playlist->songs[i]);
+    free((char*)s->songTitle);
+    free((char*)s->artistName);
+    free((char*)s->audioFilePath);
+    free((char*)s->bgFilePath);
+    free(s);
+  }
+
+  free(playlist);
 }
