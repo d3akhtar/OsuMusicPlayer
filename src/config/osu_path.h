@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #define OSU_DB_FILE_NAME "osu!.db"
-#define OSU_COLLECTIONS_FILE_NAME "collections.db"
+#define OSU_COLLECTIONS_FILE_NAME "collection.db"
 
 void init_osu_path();
 char const * get_osu_path();
