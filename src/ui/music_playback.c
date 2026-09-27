@@ -1,9 +1,12 @@
 #include "music_playback.h"
 #include "fft.h"
+#include "music/current_playlist.h"
+#include "music/playlist.h"
 #include "raylib/raygui.h"
 #include "raylib/raymath.h"
 #include "raylib/raylib.h"
 #include "ui/elements.h"
+#include "ui/song_info.h"
 #include "ui/styles.h"
 #include "utils/format.h"
 #include <stdlib.h>
@@ -111,7 +114,12 @@ void update_song_visuals()
             int right = (wav.channels == 2) ? wavPCM16[wavCursor*2 + 1] : left;
             chunkSamples[i] = (short)((left + right) / 2);
 
-            if (++wavCursor >= wav.frameCount) wavCursor = 0;
+            if (++wavCursor >= wav.frameCount) {
+              current_playlist()->currentSong++;
+              if (current_playlist()->currentSong >= current_playlist()->nSongs) current_playlist()->currentSong = 0;
+              set_song(playlist_current_song(current_playlist())->audioFilePath);
+              set_song_info_song(playlist_current_song(current_playlist()));
+            }
         }
 
         UpdateAudioStream(audioStream, chunkSamples, AUDIO_STREAM_RING_BUFFER_SIZE);
@@ -139,10 +147,22 @@ int gui_draw_music_playback()
     GuiDrawIcon(ICON_AUDIO, 25, 630, 2, CYAN);
     GuiSliderBar((Rectangle){65, 637, 200, 15}, "", "", &volumeValue, 0.0f, 1.0f);
 
-    gui_draw_icon_button(ICON_PLAYER_PREVIOUS, 360, 630, 2, CYAN);
+    if (gui_draw_icon_button(ICON_PLAYER_PREVIOUS, 360, 630, 2, CYAN)) {      
+        current_playlist()->currentSong--;
+        if (current_playlist()->currentSong < 0) current_playlist()->currentSong = current_playlist()->nSongs-1;
+        set_song(playlist_current_song(current_playlist())->audioFilePath);
+        set_song_info_song(playlist_current_song(current_playlist()));
+    }
+
     if (gui_draw_icon_button(ICON_PLAYER_PLAY, 410, 630, 2, paused ? CYAN : GREEN)) paused = false;
     if (gui_draw_icon_button(ICON_PLAYER_PAUSE, 460, 630, 2, paused ? GREEN : CYAN)) paused = true;
-    gui_draw_icon_button(ICON_PLAYER_NEXT, 510, 630, 2, CYAN);
+
+    if (gui_draw_icon_button(ICON_PLAYER_NEXT, 510, 630, 2, CYAN)) {      
+      current_playlist()->currentSong++;
+      if (current_playlist()->currentSong >= current_playlist()->nSongs) current_playlist()->currentSong = 0;
+      set_song(playlist_current_song(current_playlist())->audioFilePath);
+      set_song_info_song(playlist_current_song(current_playlist()));
+    }
     gui_draw_icon_button(ICON_REDO, 860, 630, 2, CYAN);
     
     DrawText(format_timer_progress(currentAudioStreamTimeSeconds, audioStreamTotalSeconds), 25, 670, 20, CYAN);

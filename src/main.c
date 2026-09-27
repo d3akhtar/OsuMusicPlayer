@@ -1,7 +1,9 @@
 #include "fft.h"
+#include "music/current_playlist.h"
 #include "ui/elements.h"
 #include "ui/music_playback.h"
 #include "ui/osu_path_dialog.h"
+#include "ui/playlist_song_list.h"
 #include "ui/song_info.h"
 #include "ui/styles.h"
 #include <math.h>
@@ -23,13 +25,17 @@ int main()
 
     init_default_styles();
     init_osu_path_dialog();
+    load_playlists();
+
     init_song_info();
+
+    init_playlist_song_list();
 
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(AUDIO_STREAM_RING_BUFFER_SIZE);
 
     init_music_playback();
-    set_song("resources/music/testSong.mp3");
+    set_song(current_playlist()->songs[current_playlist()->currentSong].audioFilePath);
 
     int currentPlaylistScrollIndex = 0, currentPlaylistActive = 1;
 
@@ -123,6 +129,9 @@ int main()
 
     CloseAudioDevice();
     CloseWindow();
+
+    unload_playlists();
+    
     return 0;
 }
 
