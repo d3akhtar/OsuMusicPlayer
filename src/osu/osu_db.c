@@ -1,7 +1,6 @@
 #include "osu_db.h"
 #include "osu/osu_file_reading.h"
 #include "raylib/raylib.h"
-#include "utils/string.h"
 #include <stdlib.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -11,7 +10,8 @@
 char const * __fmt_err_msg(char const * msg);
 bool __read_beatmap(OsuFile* file, Beatmap* beatmap);
 bool __read_collection(OsuFile* file, Collection* collection);
-char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLines);
+bool __find_events_section_in_beatmap_info_file(FILE *fptr);
+bool __find_bg_info_in_beatmap_info_file(FILE *fptr);
 
 Beatmap* read_beatmaps(OsuFile* file, int* nBeatmaps)
 {
@@ -88,46 +88,40 @@ char const * extract_bg_file_name(char const *beatmapInformationFilePath)
   FILE* fptr = fopen(beatmapInformationFilePath, "r");
 
   if (fptr == NULL) {
-    fprintf(stderr, "Error while opening file %s\n", beatmapInformationFilePath);
+    perror(TextFormat("Error while opening file %s", beatmapInformationFilePath));
     return NULL;
   }
 
-  while (!feof(fptr))
+  if (!__find_events_section_in_beatmap_info_file(fptr)) {
+    fclose(fptr);
+    return NULL;
+  }
+
+  if (!__find_bg_info_in_beatmap_info_file(fptr)) {
+    fclose(fptr);
+    return NULL;
+  }
+
+  int ch;
+  char buf[512];
+  size_t len = 0;
+  while ((ch = fgetc(fptr)) != EOF)
   {
-    int nLines;
-    const char ** section = __read_section_from_beatmap_information_file(fptr, &nLines);
-    if (section != NULL && strstr(section[0], "[Events]") != NULL) {
-      for (int i = 1; i < nLines; i++)
-      {
-        if (strncmp(section[i], "0,0,", 4) == 0) {
-          size_t const lineLen = strlen(section[i]);
-          char *path = (char*)alloca(lineLen);
-          size_t pathLen = 0;
-          for (int j = 4; j < lineLen; j++)
-          {
-            if (section[i][j] == '"') continue;
-            if (section[i][j] == ',' || section[i][j] == '\n') break;
-
-            path[pathLen++] = section[i][j];
-          }
-
-          if (pathLen == 0) {
-            fclose(fptr);
-            return NULL;
-          }
-
-          char* res = (char*)malloc(pathLen+1);
-          memcpy(res, path, pathLen);
-          res[pathLen] = '\0';
-
-          fclose(fptr);
-          return res;
-        } 
-      }
-
+    if (ch == '"') continue;
+    if (ch == ',' || ch == '\n') {  
+      buf[len++] = '\0';
+      char *res = (char*)malloc(len);
+      strcpy(res, buf);
       fclose(fptr);
-      return NULL;
+      return res;
     }
+
+    buf[len++] = ch;
+  }
+
+  if (len == 0) {
+    fclose(fptr);
+    return "";
   }
 
   fclose(fptr);
@@ -353,22 +347,49 @@ bool __read_collection(OsuFile* file, Collection *collection)
   return true;
 }
 
-char const ** __read_section_from_beatmap_information_file(FILE *fptr, int *nLines)
+bool __find_events_section_in_beatmap_info_file(FILE *fptr)
 {
-  int ch;
-  char buf[1 << 8];
-  while ((ch = fgetc(fptr)) != EOF) {
-    if (ch == '[') {
-      size_t len = 0;
-      buf[len++] = ch;
-      while ((ch = fgetc(fptr)) != '[' && ch != EOF)
-        buf[len++] = ch;
-     
-      fseek(fptr, -1, SEEK_CUR);
-
-      return (char const **)split_into_lines(buf, len, nLines);
+  int ch, prev = 0;
+  while ((ch = fgetc(fptr)) != EOF)
+  {
+    if (ch != '[' || prev != '\n') {
+      prev = ch;
+      continue;
     }
+    
+    size_t len = 0;
+    char buf[32];
+    buf[len++] = '[';
+    while ((ch = fgetc(fptr)) != ']' && ch != EOF)
+      buf[len++] = ch;
+
+    buf[len++] = ']';
+    buf[len++] = '\0';
+
+    if (strncmp(buf, "[Events]", 8) == 0) return true;
+
+    prev = ch;
   }
 
-  return NULL;
+  return false;
+}
+
+bool __find_bg_info_in_beatmap_info_file(FILE *fptr)
+{
+  int ch, prev = 0;
+  while ((ch = fgetc(fptr)) != EOF)
+  {
+    if (ch == '0' && prev == '\n') {
+      char buf[8];
+      buf[0] = '0';
+      if (fgets(&buf[1], 4, fptr) == NULL) return false;
+      buf[5] = '\0';
+      if (strncmp(buf, "0,0,", 5) == 0)
+        return true;
+    }
+
+    prev = ch;
+  }
+
+  return false;
 }
