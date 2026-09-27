@@ -18,11 +18,13 @@ char* join_paths(char const* a, char const* b)
   size_t bLen = strlen(b);
   size_t totalLen = aLen + bLen + 1; // + 1 for DIR_SEP
 
-  char *res = (char*)malloc(totalLen);
+  char *res = (char*)malloc(totalLen+1);
 
   memcpy(res, a, aLen);
   res[aLen] = DIR_SEP;
   memcpy(&res[aLen+1], b, bLen);
+
+  res[totalLen] = '\0';
 
   for (int i = 0; i < totalLen; i++)
     if (res[i] == '\\' || res[i] == '/') res[i] = DIR_SEP; // Ensure all slashes are represented properly according to their OS
