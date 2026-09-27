@@ -118,8 +118,8 @@ int main()
     exit(-1);    
   }
 
-  Playlist playlist = create_playlist_for_songs(songs, nSongs, collections[0].name);
-  if (!test_create_list_view_text_for_playlist(&playlist)) {
+  Playlist *playlist = create_playlist_for_songs(songs, nSongs, collections[0].name);
+  if (!test_create_list_view_text_for_playlist(playlist)) {
     fprintf(stderr, "test_create_list_view_text_for_playlist failed\n");
     exit(-1);    
   }
@@ -191,6 +191,11 @@ int test_reading_osu_db(char const *path)
   int nBeatmaps;
   Beatmap* beatmaps = read_beatmaps(&file, &nBeatmaps);
 
+  if (beatmaps == NULL) {
+    fprintf(stderr, "%s", file.err);
+    return 0;
+  }
+
   printf("Read %d beatmaps, displaying first 20\n", nBeatmaps);
 
   for (int i = 0; i < 20; i++)
@@ -215,6 +220,11 @@ int test_reading_osu_collections(char const *path)
 
   int nCollections;
   Collection* collections = read_collections(&file, &nCollections);
+
+  if (collections == NULL) {
+    fprintf(stderr, "%s", file.err);
+    return 0;
+  }
 
   printf("Read %d collections, displaying first 20\n", nCollections);
 
@@ -268,8 +278,8 @@ int test_create_playlist_for_songs(Song* songs, int nSongs)
 {
   printf("== test_create_playlist_for_songs ==\n");
 
-  Playlist playlist = create_playlist_for_songs(songs, nSongs, "Playlist name");
-  print_playlist(&playlist);
+  Playlist *playlist = create_playlist_for_songs(songs, nSongs, "Playlist name");
+  print_playlist(playlist);
 
   return 1;
 }

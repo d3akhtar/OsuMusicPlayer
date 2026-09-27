@@ -5,3 +5,5 @@
 Beatmap* read_beatmaps(OsuFile* file, int* nBeatmaps);
 Collection* read_collections(OsuFile* file, int *nCollections);
 char const * extract_bg_file_name(char const *beatmapInformationFilePath);
+void free_beatmaps(Beatmap *beatmaps, int nBeatmaps);
+void free_collections(Collection *collections, int nCollections);

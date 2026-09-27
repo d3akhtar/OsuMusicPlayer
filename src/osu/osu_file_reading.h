@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #define INT_FLOAT_PAIR_SIZE 10
 #define INT_DOUBLE_PAIR_SIZE 14
@@ -9,6 +10,7 @@
 typedef struct OsuFile {
   char const * path;
   FILE *fptr;
+  char const * err;
 } OsuFile;
 
 typedef struct Beatmap {
@@ -30,17 +32,17 @@ typedef struct Collection {
 } Collection;
 
 OsuFile open_osu_file(char const * path);
-char read_byte(OsuFile* file);
-char* read_bytes(OsuFile* file, int n);
-void skip_bytes(OsuFile* file, int n);
-short read_short(OsuFile* file);
-int read_int(OsuFile* file);
-long read_long(OsuFile* file); 
-float read_single(OsuFile* file); 
-double read_double(OsuFile* file); 
-int read_bool(OsuFile* file); 
-long read_uleb128(OsuFile* file); 
-char* read_string(OsuFile* file); 
-void skip_string(OsuFile* file);
+bool read_byte(OsuFile* file, char* value);
+bool read_bytes(OsuFile* file, int n, char** value);
+bool skip_bytes(OsuFile* file, int n);
+bool read_short(OsuFile* file, short* value);
+bool read_int(OsuFile* file, int* value);
+bool read_long(OsuFile* file, long* value); 
+bool read_single(OsuFile* file, float* value); 
+bool read_double(OsuFile* file, double* value); 
+bool read_bool(OsuFile* file, bool* value); 
+bool read_uleb128(OsuFile* file, long* value); 
+bool read_string(OsuFile* file, char** value); 
+bool skip_string(OsuFile* file);
 long tell(OsuFile* file);
 void close_osu_file(OsuFile* file);
