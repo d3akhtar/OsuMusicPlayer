@@ -1,4 +1,5 @@
 #include "osu_path.h"
+#include "utils/path.h"
 
 #include <dirent.h>
 #include <stdbool.h>
@@ -9,6 +10,8 @@
 
 static char const * osuPathStorageFile = "./path.db";
 static char* osuPath = NULL;
+static char* osuDbPath = NULL;
+static char* osuCollectionsPath = NULL;
 
 void init_osu_path()
 {
@@ -32,12 +35,25 @@ void init_osu_path()
   osuPath = (char*)malloc(len);
   memcpy(osuPath, buf, len);
 
+  osuDbPath = join_paths(osuPath, OSU_DB_FILE_NAME);
+  osuCollectionsPath = join_paths(osuPath, OSU_COLLECTIONS_FILE_NAME);
+
   fclose(fptr);
 }
 
 char const * get_osu_path()
 {
   return osuPath;
+}
+
+char const * get_osu_db_path()
+{
+  return osuDbPath;
+}
+
+char const * get_osu_collections_path()
+{
+  return osuCollectionsPath;
 }
 
 bool validate_osu_path(char const * path)
