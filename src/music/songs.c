@@ -88,11 +88,10 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
 
     songs[i].artistName = (char*)malloc(strlen(beatmap->artistName) + 1);
     songs[i].songTitle = (char*)malloc(strlen(beatmap->songTitle) + 1);
-    songs[i].audioFilePath = (char*)malloc(strlen(audioFilePath) + 1);
+    songs[i].audioFilePath = join_paths(songsPath == NULL ? "" : songsPath, audioFilePath);
  
     strcpy((char*)songs[i].artistName, beatmap->artistName);
     strcpy((char*)songs[i].songTitle, beatmap->songTitle);
-    strcpy((char*)songs[i].audioFilePath, audioFilePath);
 
     if (osuPath == NULL) continue;
 
@@ -100,6 +99,7 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
     char const * beatmapInformationFilePath = join_paths(beatmapFolderPath, beatmap->osuFileName);
     char const * bgFileName = extract_bg_file_name(beatmapInformationFilePath);
     if (bgFileName == NULL) {
+      printf("Couldn't read bg file name for beatmap at path: %s\n", beatmap->folderName);
       free((char*)beatmapFolderPath);
       free((char*)beatmapInformationFilePath);
       continue;
@@ -115,6 +115,8 @@ Song* __extract_songs_from_seen_song_paths(HashMap *seenSongPaths)
   }
 
   free((char*)songsPath);
+
+  printf("Loaded %d songs\n", seenSongPaths->nElems);
 
   return songs;
 }
