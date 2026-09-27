@@ -7,3 +7,5 @@ omp_tests
 .DS_Store
 *.dSYM*
 path.db
+*.ilk*
+*.pdb*
