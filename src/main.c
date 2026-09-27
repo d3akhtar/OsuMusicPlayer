@@ -19,7 +19,8 @@ static void __handle_input();
 int main()
 {
     Vector2 mousePos = {0,0};
-        
+
+    SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);        
     InitWindow(1280, 720, "Osu Music Player");
     SetTargetFPS(60);
 
