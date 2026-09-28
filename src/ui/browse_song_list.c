@@ -24,7 +24,7 @@ void gui_draw_browse_song_list()
 {
   songListPreviousActive = songListActive;
   
-  char **songList = (char**)playlist_song_names();
+  char **songList = (char**)playlist_song_full_names();
   char const *playlists = create_list_view_text_for_string_list((char**)playlist_names(), number_of_playlists());
   
   if (GuiButton((Rectangle) {920, 660, 350, 40}, "Browse")) showBrowseSongList = true;

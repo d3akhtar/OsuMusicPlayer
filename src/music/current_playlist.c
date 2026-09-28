@@ -4,6 +4,7 @@
 #include "music/songs.h"
 #include "osu/osu_db.h"
 #include "osu/osu_file_reading.h"
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <raylib/raylib.h>
@@ -16,6 +17,7 @@ static Collection *loadedCollections;
 
 static char const ** playlistNames;
 static char const ** playlistSongNames;
+static char const ** playlistSongFullNames;
 
 static Playlist *playlist = NULL;
 
@@ -64,6 +66,11 @@ char const ** playlist_song_names()
   return playlistSongNames;
 }
 
+char const ** playlist_song_full_names()
+{
+  return playlistSongFullNames;
+}
+
 void set_current_playlist(unsigned int index)
 {
   Collection *collection = index == 0
@@ -83,9 +90,13 @@ void unload_playlists()
 {
   free_beatmaps(loadedBeatmaps, nBeatmaps);
   free_collections(loadedCollections, nCollections);
+
+  for (int i = 0; i < playlist->nSongs; i++) free(&playlistSongFullNames[i]);
+  
   free_playlist(playlist);
   free(playlistNames);
   free(playlistSongNames);
+  free(playlistSongFullNames);
 }
 
 static int __load_beatmaps(Beatmap **beatmaps)
@@ -127,6 +138,7 @@ static void __create_playlist_for_beatmaps(Collection* collection, Beatmap* beat
   if (playlist != NULL) {
     free_playlist(playlist);
     free(playlistSongNames);
+    free(playlistSongFullNames);
   }
 
   int nSongs;
@@ -141,6 +153,11 @@ static void __create_playlist_for_beatmaps(Collection* collection, Beatmap* beat
   playlist = create_playlist_for_songs(songs, nSongs, playlistName);
 
   playlistSongNames = (char const**)malloc(nSongs * sizeof(char*));
-  for (int i = 0; i < nSongs; i++)
+  playlistSongFullNames = (char const**)malloc(nSongs * sizeof(char*));
+  for (int i = 0; i < nSongs; i++) {
     playlistSongNames[i] = songs[i].songTitle;
+    char *fullName = (char*)TextFormat("%s - %s", songs[i].artistName, songs[i].songTitle);
+    playlistSongFullNames[i] = (char*)malloc(strlen(fullName));
+    strcpy((char*)playlistSongFullNames[i], fullName);
+  }
 }
