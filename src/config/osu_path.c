@@ -32,7 +32,7 @@ void init_osu_path()
     return;
   }
 
-  osuPath = (char*)malloc(len);
+  osuPath = (char*)calloc(len, sizeof(char));
   memcpy(osuPath, buf, len);
 
   osuDbPath = join_paths(osuPath, OSU_DB_FILE_NAME);

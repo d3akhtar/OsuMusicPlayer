@@ -22,7 +22,6 @@ Song* playlist_current_song(Playlist *playlist)
 
 void free_playlist(Playlist *playlist)
 {
-  free(playlist->name);
   for (int i = 0; i < playlist->nSongs; i++)
   {
     Song *s = &(playlist->songs[i]);
@@ -30,8 +29,9 @@ void free_playlist(Playlist *playlist)
     free((char*)s->artistName);
     free((char*)s->audioFilePath);
     free((char*)s->bgFilePath);
-    free(s);
   }
 
+  free(playlist->songs);
+  free(playlist->name);
   free(playlist);
 }

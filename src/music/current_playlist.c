@@ -49,6 +49,11 @@ Playlist* current_playlist()
   return playlist;
 }
 
+int number_of_playlists()
+{
+  return nCollections+1;
+}
+
 char const ** playlist_names()
 {
   return playlistNames;
@@ -57,6 +62,21 @@ char const ** playlist_names()
 char const ** playlist_song_names()
 {
   return playlistSongNames;
+}
+
+void set_current_playlist(unsigned int index)
+{
+  Collection *collection = index == 0
+    ? NULL
+    : &loadedCollections[index-1];
+
+  __create_playlist_for_beatmaps(collection, loadedBeatmaps, nBeatmaps);
+}
+
+void set_playlist_current_song(unsigned int index)
+{
+  if (index < 0 || index >= playlist->nSongs) return;
+  playlist->currentSong = index;
 }
 
 void unload_playlists()
@@ -116,10 +136,11 @@ static void __create_playlist_for_beatmaps(Collection* collection, Beatmap* beat
 
   char const *playlistName = collection == NULL
     ? "All"
-    : playlist->name;
+    : collection->name;
   
   playlist = create_playlist_for_songs(songs, nSongs, playlistName);
 
   playlistSongNames = (char const**)malloc(nSongs * sizeof(char*));
-  for (int i = 0; i < nSongs; i++) playlistSongNames[i] = songs[i].songTitle;
+  for (int i = 0; i < nSongs; i++)
+    playlistSongNames[i] = songs[i].songTitle;
 }

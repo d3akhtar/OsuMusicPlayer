@@ -1,4 +1,5 @@
 #include "string.h"
+#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,28 +32,12 @@ char ** split_into_lines(char const * str, size_t len, int* nLines)
 
 char const * create_list_view_text_for_playlist(Playlist* playlist)
 {
-  size_t* savedSongLens = (size_t*)malloc(playlist->nSongs * sizeof(size_t));
-  size_t len = 0;
-  for (int i = 0; i < playlist->nSongs; i++) {
-    savedSongLens[i] = strlen(playlist->songs[i].songTitle);
-    len += savedSongLens[i]+1;
-  }
+  char **playlistSongNames = (char**)alloca(playlist->nSongs * sizeof(char*));
+  for (int i = 0; i < playlist->nSongs; i++)
+    playlistSongNames[i] = (char*)playlist->songs[i].songTitle;
 
-  len--;
-  char * res = (char*)malloc(len);
-  int resP = 0;
-  
-  for (int i = 0; i < playlist->nSongs; i++) {
-    memcpy(&res[resP], playlist->songs[i].songTitle, savedSongLens[i]);
-    resP += savedSongLens[i];
-    res[resP++] = ';';
-  }
-
-  free(savedSongLens);
-
-  res[resP-1] = '\0';
-
-  return res;
+  char const *res = create_list_view_text_for_string_list(playlistSongNames, playlist->nSongs);
+  return res;                           
 }
 
 static int __get_number_of_lines(char const * str, size_t len)
@@ -62,4 +47,30 @@ static int __get_number_of_lines(char const * str, size_t len)
     if (str[i] == '\n') nLines++;
 
   return nLines;
+}
+
+char const * create_list_view_text_for_string_list(char** items, int nItems)
+{
+  size_t* savedSongLens = (size_t*)malloc(nItems * sizeof(size_t));
+  size_t len = 0;
+  for (int i = 0; i < nItems; i++) {
+    savedSongLens[i] = strlen(items[i]);
+    len += savedSongLens[i]+1;
+  }
+
+  len--;
+  char *res = (char*)malloc(len);
+  int resP = 0;
+
+  for (int i = 0; i < nItems; i++) {
+    memcpy(&res[resP], items[i], savedSongLens[i]);
+    resP += savedSongLens[i];
+    res[resP++] = ';';
+  }
+
+  free(savedSongLens);
+
+  res[resP-1] = '\0';
+
+  return res;
 }
