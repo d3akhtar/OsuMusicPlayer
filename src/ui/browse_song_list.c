@@ -4,6 +4,7 @@
 #include "ui/song_info.h"
 #include "utils/string.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <raylib/raylib.h>
 #include <raylib/raygui.h>
@@ -80,5 +81,7 @@ void gui_draw_browse_song_list()
 
       if (songListActive != current_playlist()->currentSong)
         songListActive = current_playlist()->currentSong;
-  }  
+  }
+
+  free((char*)playlists);
 }

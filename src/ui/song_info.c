@@ -41,6 +41,9 @@ void set_song_info_song(Song* song)
   };
   
   set_visualizer_bar_color(avgColor);
+
+  UnloadImageColors(pixels);
+  UnloadImage(bgImage);
 }
 
 void gui_draw_song_info()

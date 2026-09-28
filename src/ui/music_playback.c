@@ -75,6 +75,7 @@ void init_music_playback()
 void set_song(char const *path)
 {
   UnloadAudioStream(audioStream);
+  UnloadWave(wav);
   
   wav = LoadWave(path);
   WaveFormat(&wav, SAMPLE_RATE, PER_SAMPLE_BIT_DEPTH, MONO);

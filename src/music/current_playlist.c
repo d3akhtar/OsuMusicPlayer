@@ -138,6 +138,7 @@ static void __create_playlist_for_beatmaps(Collection* collection, Beatmap* beat
   if (playlist != NULL) {
     free_playlist(playlist);
     free(playlistSongNames);
+    for (int i = 0; i < playlist->nSongs; i++) free(&playlistSongFullNames[i]);
     free(playlistSongFullNames);
   }
 
