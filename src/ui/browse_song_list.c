@@ -77,5 +77,8 @@ void gui_draw_browse_song_list()
         set_song(playlist_current_song(current_playlist())->audioFilePath);
         set_song_info_song(playlist_current_song(current_playlist()));
       }
+
+      if (songListActive != current_playlist()->currentSong)
+        songListActive = current_playlist()->currentSong;
   }  
 }

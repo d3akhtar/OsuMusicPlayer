@@ -25,17 +25,19 @@ void gui_draw_playlist_song_list()
   GuiSetStyle(LISTVIEW, BORDER_WIDTH, 2);
   GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_NORMAL, 1);
   GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_WIDTH, 1);
-
-  GuiListViewEx((Rectangle) {920, 450, 350, 200}, playlistSongsList, current_playlist()->nSongs, &currentPlaylistScrollIndex, &currentPlaylistActive, NULL);
-  if (currentPlaylistActive != previousSelectedIndex) {
-    set_playlist_current_song(currentPlaylistActive);
-    set_song(playlist_current_song(current_playlist())->audioFilePath);
-    set_song_info_song(playlist_current_song(current_playlist()));
-  }
-  
+  GuiListViewEx((Rectangle) {920, 450, 350, 200}, playlistSongsList, current_playlist()->nSongs, &currentPlaylistScrollIndex, &currentPlaylistActive, NULL);  
   GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
   GuiSetStyle(LISTVIEW, TEXT_PADDING, 0);
   GuiSetStyle(LISTVIEW, BORDER_WIDTH, 2);
   GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_NORMAL, 1);
   GuiSetStyle(LISTVIEW, LIST_ITEMS_BORDER_WIDTH, 1);
+
+  if (currentPlaylistActive != previousSelectedIndex) {
+    set_playlist_current_song(currentPlaylistActive);
+    set_song(playlist_current_song(current_playlist())->audioFilePath);
+    set_song_info_song(playlist_current_song(current_playlist()));
+  }
+
+  if (currentPlaylistActive != current_playlist()->currentSong)
+    currentPlaylistActive = current_playlist()->currentSong;
 }
